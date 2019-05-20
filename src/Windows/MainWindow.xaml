@@ -1,0 +1,178 @@
+﻿<Window x:Class="UsbExtractor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UsbExtractor"
+        mc:Ignorable="d"
+        Title="Iso2Usb" Icon="Resources/icon.png" WindowStartupLocation="CenterScreen" SizeToContent="Height" ResizeMode="CanMinimize" Height="378" Width="470" Closing="Window_Closing">
+    <DockPanel>
+
+        <!-- Status Bar Strip -->
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Margin="3,0,0,0" Name="_statusLabel" Text="Ready..."/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Name="_main2" Orientation="Horizontal">
+                    <!-- Check for updates -->
+                    <Button Margin="3,0,0,0" ToolTip="Check for updates" Name="_checkupdates" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                        <Image Height="14" Source="Resources/update.png"/>
+                    </Button>
+                    <!-- Calculate Checksum -->
+                    <Button Margin="3,0,0,0" ToolTip="Calculate MD5, SHA1 keys" Name="_checksum" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                        <Image Source="Resources/checksum.png"/>
+                    </Button>
+                    <!-- Visit Web -->
+                    <Button Margin="3,0,0,0" ToolTip="Visit Web" Name="_visitWeb" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                        <Image Source="Resources/web.png"/>
+                    </Button>
+                    <!-- Information -->
+                    <Button Margin="3,0,3,0" ToolTip="About" Name="_infobutton" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                        <Image Source="Resources/info.png"/>
+                    </Button>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
+        <Border Padding="10,5,10,10">
+            <StackPanel>
+                <!-- Separator General -->
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="43"/>
+                        <ColumnDefinition Width="348*"/>
+                        <ColumnDefinition Width="53*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock  Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,347.2,-0.4" >
+                        <TextBlock.Inlines>
+                            <Run FontWeight="Bold" FontSize="10" Text="General" />
+                        </TextBlock.Inlines>
+                    </TextBlock>
+                    <Separator Grid.ColumnSpan="3" Margin="43,2,0,1.6"/>
+                </Grid>
+
+                <!-- USB Drive & Select File-->
+                <Grid Name="_main">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Margin="0,5,0,0" Padding="0,0,0,2" Text="USB Drive"/>
+                        <ComboBox Name="_usbdriveCombo" SelectionChanged="_usbdriveCombo_SelectionChanged"/>
+                    </StackPanel>
+                    <StackPanel Margin="10,0,0,0" Grid.Column="1">
+                        <TextBlock Margin="0,5,0,0" Padding="0,0,0,2" Text="Select File"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="25"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Margin="0,0,8,0" Grid.Column="0" Name="_fileCombo"/>
+                            <Button ToolTip="Select a file (.iso)" Name="_browseButton" Height="22.5" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Grid.Column="1" Click="_browseButton_Click">
+                                <Image Source="Resources/disk.png"></Image>
+                            </Button>
+
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Separator Format -->
+                <Grid Margin="0,7,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock  Grid.Column="0" >
+                        <TextBlock.Inlines>
+                            <Run FontWeight="Bold" FontSize="10" Text="Format" />
+                        </TextBlock.Inlines>
+                    </TextBlock>
+                    <Separator Grid.Column="1"/>
+                </Grid>
+
+                <StackPanel Name="_formatpanel">
+                    <!-- Volume label & Partition Type -->
+                    <Grid Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="270"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Volume Label"/>
+                            <TextBox Name="_labelTextBox" Padding="3,0,0,0" VerticalContentAlignment="Center" Height="22" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="10,0,0,0" Grid.Column="1">
+                            <TextBlock Text="Partition Type"/>
+                            <ComboBox Name="_partitionCombo" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- FileSystem, Cluster Size & Target System -->
+                    <Grid Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="File System"/>
+                            <ComboBox Name="_filesystemCombo" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="10,0,0,0" Grid.Column="1">
+                            <TextBlock Text="Cluster Size"/>
+                            <ComboBox Name="_clusterCombo" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="10,0,0,0" Grid.Column="2">
+                            <TextBlock Text=""/>
+                        </StackPanel>
+                        <StackPanel Margin="10,0,0,0" Grid.Column="2">
+                            <TextBlock Text="Target System"/>
+                            <ComboBox Name="_targetCombo" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <CheckBox Name="_quickformatCheckBox" Content="Quick Format" IsChecked="True" Margin="0,8,0,0">
+                        <CheckBox.ToolTip>
+                            <TextBlock Text="If not check, it will not scan for bad sectors"/>
+                        </CheckBox.ToolTip>
+                    </CheckBox>
+                    <CheckBox ToolTip="This will create autorun.inf and autorun.ico like we see in Rufus." Name="_enableautorunCheckBox" IsChecked="True" Margin="0,5,0,0" Content="Create icon and label files (autorun.inf)"/>
+                </StackPanel>
+
+                <!-- Separator Status -->
+                <Grid Margin="0,7,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="35"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock  Grid.Column="0" >
+                        <TextBlock.Inlines>
+                            <Run FontWeight="Bold" FontSize="10" Text="Status" />
+                        </TextBlock.Inlines>
+                    </TextBlock>
+                    <Separator Grid.Column="1"/>
+                </Grid>
+
+                <!-- ProgressBar and Start Button-->
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <ProgressBar Height="22" Name="_progressBar" Margin="0,0,9.6,0.4" Grid.Column="0" Grid.ColumnSpan="2"/>
+                        <TextBlock Margin="0,2,0,0" Name="_progresslabel" HorizontalAlignment="Center" Grid.ColumnSpan="2"/>
+                    </Grid>
+                    <Button ToolTip="Start/Stop the process" Height="22" Name="_startcancelButton" Grid.Column="1" Content="START" Click="_startcancelButton_Click"/>
+                </Grid>
+                <!-- Log View -->
+                <Expander Name="_expander" IsExpanded="False" Header="Show Log" Margin="0,10,0,0">
+                    <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto"  IsReadOnly="True" Padding="3" Margin="0,8,0,0" Name="_logTextBox" Height="100" FontFamily="Consolas" FontSize="11"/>
+                </Expander>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+
+</Window>
