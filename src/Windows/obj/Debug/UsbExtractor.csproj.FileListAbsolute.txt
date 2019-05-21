@@ -17,7 +17,6 @@ C:\Users\Dell\documents\visual studio 2017\Projects\UsbExtractor\UsbExtractor\ob
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\bin\Debug\Iso2Usb.exe.config
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\bin\Debug\Iso2Usb.exe
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\bin\Debug\Iso2Usb.pdb
-C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\UsbExtractor.csprojResolveAssemblyReference.cache
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\about.g.cs
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\MainWindow.g.cs
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\App.g.cs

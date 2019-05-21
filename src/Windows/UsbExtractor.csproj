@@ -112,11 +112,12 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Resource Include="Resources\ldlinux-603" />
+    <Resource Include="Resources\ldlinux_604" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -147,6 +148,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\7z.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\vhd_save.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

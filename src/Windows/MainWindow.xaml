@@ -10,14 +10,18 @@
 
         <!-- Status Bar Strip -->
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Margin="3,0,0,0" Name="_statusLabel" Text="Ready..."/>
+            <StatusBarItem MaxWidth="320">
+                <TextBlock  Margin="3,0,0,0" Name="_statusLabel" Text="Ready..."/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Name="_main2" Orientation="Horizontal">
                     <!-- Check for updates -->
                     <Button Margin="3,0,0,0" ToolTip="Check for updates" Name="_checkupdates" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
                         <Image Height="14" Source="Resources/update.png"/>
+                    </Button>
+                    <!-- Create VHD -->
+                    <Button Margin="3,0,0,0" ToolTip="Create VHD from USB" Visibility="Collapsed" Name="_createvhd" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Click="_createvhd_Click">
+                        <Image  Source="Resources/vhd_save.png"/>
                     </Button>
                     <!-- Calculate Checksum -->
                     <Button Margin="3,0,0,0" ToolTip="Calculate MD5, SHA1 keys" Name="_checksum" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">

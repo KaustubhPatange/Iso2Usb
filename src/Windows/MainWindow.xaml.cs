@@ -28,7 +28,7 @@ namespace UsbExtractor
     {
         // Using drive detector class from https://www.codeproject.com/articles/18062/detecting-usb-drive-removal-in-a-c-program
         private DriveDetector driveDetector; long volumeSize = 0; string volumeLabel = null;
-        private string temp; DispatcherTimer timer,timer2; BackgroundWorker main;
+        private string temp; DispatcherTimer timer,timer2; BackgroundWorker main; string syslinux = null;
         public MainWindow()
         {
             InitializeComponent();
@@ -170,7 +170,7 @@ namespace UsbExtractor
                     if (_partitionCombo.SelectedItem as string == "GPT") ptype = DriveExtender.PartitionType.GPT;
                     if (_quickformatCheckBox.IsChecked==true) quickformat = true;
                     clustersize = (_clusterCombo.SelectedItem as string).Split(' ')[0];
-                    _startcancelButton.Content = "ABORT"; Disable();
+                    _startcancelButton.Content = "ABORT"; Disable(true);
                     // Starting timer...
                     int _min = 0, _sec = 0;
                     timer2 = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
@@ -213,15 +213,27 @@ namespace UsbExtractor
                     });
                     do { DoEvents(); } while (!factory.IsCompleted);
                     _progressBar.IsIndeterminate = false;
+                    // Step 1.1: Copying syslinux...
+                    Log("Detected Syslinux: " + syslinux);
+                    switch(syslinux)
+                    {
+                        case "6.03":
+                            File.WriteAllBytes(driveletter + ":\\Idlinux.sys", Properties.Resources.ldlinux_603);
+                            break;
+                        case "6.04":
+                            File.WriteAllBytes(driveletter + ":\\Idlinux.sys", Properties.Resources.ldlinux_604);
+                            break;
+                    }
+                    Execute("cmd.exe", "/c attrib +s +r +h " + driveletter + ":\\Idlinux.sys");
                     // Step 2: Extracting ISO...
-                    Log("Extracting ISO to " + driveletter + ":\\");
+                    Log("Extracting ISO to " + driveletter + ":");
                     ExtractISO(filename, driveletter + ":\\");
                     _startcancelButton.Content = "START";
                     DeleteDirectory(driveletter + ":\\[BOOT]", true);
                     Log("Done");
                     _progressBar.Value = 0;
                     timer2.Stop();
-                    Log($"Ran for {_min} min {_sec} sec");
+                    Log($"--- Ran for {_min} min {_sec} sec ---");
                     MessageBox.Show("Bootable media has been created!", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else return;
@@ -274,6 +286,64 @@ namespace UsbExtractor
             loadDefaultDrive();
         }
         /// <summary>
+        /// This event will occur when _createvhd button is clicked...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _createvhd_Click(object sender, RoutedEventArgs e)
+        {
+            /* A RUFUS inspired feature to create VHD from usb devices...
+             */
+            SaveFileDialog sd = new SaveFileDialog();
+            sd.Filter = "Virtual hard disk|*.vhd";
+            sd.FileName = _labelTextBox.Text;
+            sd.Title = "Choose a path to save data on usb stick as vhd file";
+            if (sd.ShowDialog() == true)
+            {
+                if (File.Exists(sd.FileName)) File.Delete(sd.FileName);
+                // Starting timer...
+                int _min = 0, _sec = 0;
+                timer2 = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+                {
+                    _sec++;
+                    if (_sec >= 60) { _min++; _sec = 0; }
+                    _progresslabel.Text = $"Running: {_min} min {_sec} sec";
+                }, this.Dispatcher);
+                Disable(true);
+                timer2.Start();
+                // We will first create an empty VHD file using diskpart...
+                Log($"Creating empty vhd file {volumeSize / (1024 * 1024)} MB (1\\3)");
+                CreateEmptyVHD(sd.FileName);
+                // We will now mount it by formatting it first...
+                Log($"Mounting vhd as partition (2\\3)");
+                _progressBar.IsIndeterminate = true;
+                Task task1 = Task.Factory.StartNew(() => {
+                    DriveExtender.DiskPart(new string[] {
+                        $"select vdisk file=\"{sd.FileName}\"",
+                        "attach vdisk",
+                        "convert mbr",
+                        "create partition primary",
+                        "format fs=ntfs label=\"VHD\" quick",
+                        "assign letter=q"
+                    });
+                });
+                do DoEvents(); while (!task1.IsCompleted);
+                _progressBar.IsIndeterminate = false;
+                // Now let's copy file on the disk...
+                Log($"Copying contents from USB (3\\3)");
+                CopyDir(volumeLabel + ":\\","Q:\\");
+                // Ejecting mounted vhd...
+                DriveExtender.DiskPart(new string[] { $"select volume q", "remove" });
+                Log($"Done");
+                timer2.Stop();
+                Enable();
+                Log($"--- Ran for {_min} min {_sec} sec ---");
+                MessageBox.Show("VHD file has been created at given location!", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
+                _progressBar.Value = 0;
+            }
+        }
+
+        /// <summary>
         /// This will use to analyse iso file...
         /// </summary>
         /// <param name="fileName"></param>
@@ -301,6 +371,8 @@ namespace UsbExtractor
                     _labelTextBox.Text = Path.GetFileNameWithoutExtension(fileName);
                 }
                 _progressBar.Value = 100;
+                // Detect syslinux version...
+                syslinux = DetectSyslinuxVersion(temp + "\\isolinux");
                 // Since it is linux the Partition Type should be checked as MBR by default...
                 _partitionCombo.SelectedIndex = 0;
                 // Setting Target system as BIOS or UFEI...
@@ -419,6 +491,18 @@ namespace UsbExtractor
                 makeDefault();
             }
         }
+        private string DetectSyslinuxVersion(string location)
+        {
+            if (File.Exists(location + "\\isolinux.bin"))
+            {
+                /* A very bad regex here, but seriously I can't think of something else.
+                 * Seriously a freaking dirty way to detect syslinux version... Mind blowing...
+                 */
+                return Regex.Match(File.ReadAllText(location + "\\isolinux.bin"), @"ISOLINUX \d\.\d\d")
+                    .Value.Replace("ISOLINUX ","").Trim();
+            }
+            return null;
+        }
         internal void makeDefault()
         {
             int index = _clusterCombo.Items.Count - 1;
@@ -435,9 +519,13 @@ namespace UsbExtractor
             _fileCombo.IsEnabled = false;
             if (all)
             {
+                _createvhd.IsEnabled = false;
                 _main.IsEnabled = false;
                 _main2.IsEnabled = false;
                 _usbdriveCombo.IsEnabled = false;
+                _browseButton.IsEnabled = false;
+                driveDetector.DeviceArrived -= OnDriveArrived;
+                driveDetector.DeviceRemoved -= OnDriveRemoved;
             }
         }
         /// <summary>
@@ -450,7 +538,14 @@ namespace UsbExtractor
             _main.IsEnabled = true;
             _main2.IsEnabled = true;
             _usbdriveCombo.IsEnabled = true;
+            _createvhd.IsEnabled = true;
+            _browseButton.IsEnabled = true;
             _progresslabel.Text = "";
+            _progressBar.Value = 0;
+            _statusLabel.Text = "Ready...";
+            driveDetector = new DriveDetector();
+            driveDetector.DeviceArrived += new DriveDetectorEventHandler(OnDriveArrived);
+            driveDetector.DeviceRemoved += new DriveDetectorEventHandler(OnDriveRemoved);
         }
         /// <summary>
         /// This will set the proper index to USBDriveComboBox
@@ -460,8 +555,12 @@ namespace UsbExtractor
             try
             {
                 _usbdriveCombo.SelectedIndex = _usbdriveCombo.Items.Count - 1;
-                if (_usbdriveCombo.SelectedIndex <= 0)
+                if (_usbdriveCombo.Items.Count <= 0)
+                {
                     _startcancelButton.IsEnabled = false;
+                    _createvhd.Visibility = Visibility.Collapsed;
+                }
+                else _createvhd.Visibility = Visibility.Visible;
                 DetectSize();
                 DetectClusterSize();
             }
@@ -542,13 +641,72 @@ namespace UsbExtractor
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background,
                                                   new Action(delegate { }));
         }
+        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            // If the destination directory doesn't exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string temppath = Path.Combine(destDirName, file.Name);
+                try
+                {
+                    file.CopyTo(temppath, true);
+                }
+                catch { }
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string temppath = Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                }
+            }
+        }
+        public void CreateEmptyVHD(string filename)
+        {
+            _progressBar.IsIndeterminate = true;
+            Task task = Task.Factory.StartNew(() => {
+                DriveExtender.DiskPart(new string[] { $"create vdisk file=\"{filename}\" maximum={volumeSize / (1024 * 1024)}" });
+            });
+            do { DoEvents(); } while (!task.IsCompleted);
+            _progressBar.IsIndeterminate = false;
+        }
+        public void CopyDir(string sourcedir, string destination)
+        {
+            _progressBar.IsIndeterminate = true;
+            Task io = Task.Factory.StartNew(() => {
+                DirectoryCopy(sourcedir, destination, true);
+            });
+            do { DoEvents(); } while (!io.IsCompleted);
+            _progressBar.IsIndeterminate = false;
+        }
         public void ExtractISO(string filename, string destination)
         {
             _progressBar.IsIndeterminate = false;
             main = new BackgroundWorker();
             main.WorkerSupportsCancellation = true;
             timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Interval = new TimeSpan(0, 0, 3);
             var mainlength = new FileInfo(filename).Length;
             main.DoWork += (s, e) =>
             {
@@ -572,7 +730,7 @@ namespace UsbExtractor
                     }
                     else _progressBar.Value = 100;
                 }
-                catch {  }
+                catch { }
             };
             main.RunWorkerAsync();
             timer.Start();
@@ -584,12 +742,13 @@ namespace UsbExtractor
         }
         public string Execute7zip(string filename, string destination)
         {
-            string text = null;
+            /* Can't log 7-zip still will figure out a way soon */
+            string text = "";
             Process p = new Process();
             p.StartInfo.FileName = "cmd.exe";
             p.StartInfo.Arguments = $"/c {temp + "\\7z.exe"} x -y \"{filename}\" -o\"{destination}\"";
-            p.StartInfo.RedirectStandardError = true;
-            p.StartInfo.RedirectStandardOutput = true;
+            //p.StartInfo.RedirectStandardError = true;
+            //p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.WorkingDirectory = temp;
             p.StartInfo.CreateNoWindow = true;
@@ -598,10 +757,10 @@ namespace UsbExtractor
             do
             {
                 DoEvents();
-                string output = p.StandardOutput.ReadToEnd();
-                text += output;
-                string err = p.StandardError.ReadToEnd();
-                text += err;
+                //string output = p.StandardOutput.ReadToEnd();
+                //text += output;
+                //string err = p.StandardError.ReadToEnd();
+                //text += err;
             }
             while (!p.HasExited);
             return text;
@@ -638,8 +797,8 @@ namespace UsbExtractor
             FileInfo[] fis = d.GetFiles();
             foreach (FileInfo fi in fis)
             {
-                size += GetFileSizeOnDisk(fi.FullName);
-               // size += fi.Length;
+              //  size += GetFileSizeOnDisk(fi.FullName);
+                size += fi.Length;
             }
             // Add subdirectory sizes.
             DirectoryInfo[] dis = d.GetDirectories();
@@ -662,6 +821,24 @@ namespace UsbExtractor
             }
 
             return string.Format("{0:n" + decimalPlaces + "} {1}", dValue, SizeSuffixes[i]);
+        }
+        public string GetVolumeNumber(string driveletter)
+        {
+            string VolumeNumber = null;
+            var output = Regex.Split(DriveExtender.DiskPart(new string[] { "list volume" }), "\r\n|\r|\n");
+            foreach (string line in output)
+            {
+                if (line.Contains("Removable"))
+                {
+                    // This is a usb drive...
+                    string formatted_string = Regex.Replace(line.Trim(), "[ ]{2,}", " ", RegexOptions.None);
+                    var letter = formatted_string.Split(' ')[2];
+                    if (letter.Contains(driveletter))
+                        VolumeNumber = formatted_string.Split(' ')[1];
+                }
+                if (VolumeNumber != null) break;
+            }
+            return VolumeNumber;
         }
         #endregion
     }

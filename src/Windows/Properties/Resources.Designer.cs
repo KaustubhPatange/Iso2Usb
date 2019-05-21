@@ -111,11 +111,41 @@ namespace UsbExtractor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ldlinux_603 {
+            get {
+                object obj = ResourceManager.GetObject("ldlinux_603", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ldlinux_604 {
+            get {
+                object obj = ResourceManager.GetObject("ldlinux_604", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap update {
             get {
                 object obj = ResourceManager.GetObject("update", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap vhd_save {
+            get {
+                object obj = ResourceManager.GetObject("vhd_save", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
