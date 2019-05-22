@@ -10,13 +10,13 @@
 
         <!-- Status Bar Strip -->
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem MaxWidth="320">
+            <StatusBarItem Width="330">
                 <TextBlock  Margin="3,0,0,0" Name="_statusLabel" Text="Ready..."/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Name="_main2" Orientation="Horizontal">
                     <!-- Check for updates -->
-                    <Button Margin="3,0,0,0" ToolTip="Check for updates" Name="_checkupdates" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                    <Button Margin="3,0,0,0" ToolTip="Check for updates" Name="_checkupdates" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Click="_checkupdates_Click">
                         <Image Height="14" Source="Resources/update.png"/>
                     </Button>
                     <!-- Create VHD -->
@@ -24,7 +24,7 @@
                         <Image  Source="Resources/vhd_save.png"/>
                     </Button>
                     <!-- Calculate Checksum -->
-                    <Button Margin="3,0,0,0" ToolTip="Calculate MD5, SHA1 keys" Name="_checksum" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                    <Button Margin="3,0,0,0" ToolTip="Calculate MD5, SHA1 keys" Visibility="Collapsed" Name="_checksum" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Click="_checksum_Click">
                         <Image Source="Resources/checksum.png"/>
                     </Button>
                     <!-- Visit Web -->
@@ -32,7 +32,7 @@
                         <Image Source="Resources/web.png"/>
                     </Button>
                     <!-- Information -->
-                    <Button Margin="3,0,3,0" ToolTip="About" Name="_infobutton" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                    <Button Margin="3,0,3,0" ToolTip="About" Name="_infobutton" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Click="_infobutton_Click">
                         <Image Source="Resources/info.png"/>
                     </Button>
                 </StackPanel>
@@ -122,7 +122,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="File System"/>
-                            <ComboBox Name="_filesystemCombo" Margin="0,3,0,0"/>
+                            <ComboBox Name="_filesystemCombo" Margin="0,3,0,0" SelectionChanged="_filesystemCombo_SelectionChanged"/>
                         </StackPanel>
                         <StackPanel Margin="10,0,0,0" Grid.Column="1">
                             <TextBlock Text="Cluster Size"/>

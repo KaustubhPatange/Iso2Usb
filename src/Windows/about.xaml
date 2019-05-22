@@ -5,17 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UsbExtractor"
         mc:Ignorable="d"
-        Title="about" Height="382.4" ResizeMode="NoResize" Width="450">
+        Title="About" WindowStartupLocation="CenterOwner" Padding="10" Height="210.4" ResizeMode="NoResize" Width="302.8">
     <Border Padding="8">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Margin="10" VerticalAlignment="Top" Source="Resources/info.png"/>
-            <StackPanel Margin="10" Grid.Column="1">
-                <TextBlock Text=""/>
+        <StackPanel>
+            <Image Margin="0,0,0,5" Height="60" Source="Resources/icon.png"/>
+            <Separator Width="200"/>
+            <TextBlock Margin="0,5,0,0" Text="Iso2Usb" HorizontalAlignment="Center" FontWeight="Bold"/>
+            <TextBlock Margin="0,3,0,0" TextAlignment="Center" Width="200" TextWrapping="WrapWithOverflow" Text="A utility to create bootable storage device from ISO images" HorizontalAlignment="Center" FontSize="10"/>
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Button  Margin="8,8,0,0" Cursor="Hand" Name="_github" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                    <Image Width="22" Height="22" Source="Resources/github.png"/>
+                </Button>
+                <Button  Margin="8,8,0,0" Name="_website" Cursor="Hand" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                    <Image Width="22" Height="20" Source="Resources/visitweb.png"/>
+                </Button>
             </StackPanel>
-        </Grid>
+        </StackPanel>
     </Border>
 </Window>

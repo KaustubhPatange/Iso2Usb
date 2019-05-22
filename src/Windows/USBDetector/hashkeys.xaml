@@ -1,0 +1,20 @@
+﻿<Window x:Class="UsbExtractor.USBDetector.hashkeys"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UsbExtractor.USBDetector"
+        mc:Ignorable="d"
+        Title="MD5 &#38; SHA1" Padding="12" SizeToContent="WidthAndHeight" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="125" Width="373.2">
+    <StackPanel>
+        <StackPanel Margin="12,12,12,0" Orientation="Horizontal">
+            <TextBlock Text="MD5: "/>
+            <TextBox HorizontalContentAlignment="Center" Width="300" Margin="8,0,0,0" Name="_md5" IsReadOnly="True" FontFamily="Consolas"/>
+        </StackPanel>
+        <StackPanel Margin="12,12,12,0" Orientation="Horizontal">
+            <TextBlock Text="SHA1: "/>
+            <TextBox HorizontalContentAlignment="Center" Width="300" Margin="5,0,0,0" Name="_sha1" IsReadOnly="True" FontFamily="Consolas"/>
+        </StackPanel>
+        <Button Margin="290,10,12,12" DockPanel.Dock="Bottom" Name="_close" Width="60" Content="OK" Click="_close_Click"/>
+    </StackPanel>
+</Window>

@@ -2,13 +2,13 @@
 using kp.Iso2Linux;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -18,6 +18,9 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using System.Windows.Shell;
+using System.Net;
+using Adb_gui_Apkbox_plugin;
 
 namespace UsbExtractor
 {
@@ -27,13 +30,16 @@ namespace UsbExtractor
     public partial class MainWindow : Window
     {
         // Using drive detector class from https://www.codeproject.com/articles/18062/detecting-usb-drive-removal-in-a-c-program
-        private DriveDetector driveDetector; long volumeSize = 0; string volumeLabel = null;
+        private DriveDetector driveDetector; long volumeSize = 0; string volumeLabel = null, filename = null;
         private string temp; DispatcherTimer timer,timer2; BackgroundWorker main; string syslinux = null;
+        string settingfile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\iso2usb.ini";
         public MainWindow()
         {
             InitializeComponent();
             Disable();
             Title = "Iso2Usb - " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + " (Portable)";
+            TaskbarItemInfo = new TaskbarItemInfo();
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
         }
         /// <summary>
         /// This event will occur when the window is closing i.e application is about to close.
@@ -71,6 +77,12 @@ namespace UsbExtractor
             _filesystemCombo.Items.Add("FAT32/vfat (Default)");
             _filesystemCombo.Items.Add("NTFS");
             _filesystemCombo.SelectedIndex = 0;
+            // Setting some settings for Iso2Usb...
+            if (!File.Exists(settingfile))
+            {
+                File.WriteAllText(settingfile, "[Settings]\n" +
+                    "checkupdates=yes");
+            }
             // Method to detect already connected USBs...
             DetectUSB();
         }
@@ -201,7 +213,7 @@ namespace UsbExtractor
                     {
                         volumelabel = new string(volumelabel.Take(32).ToArray());
                     }
-
+                    volumelabel = volumelabel.Trim();
                     // Using my DriveExtender class to create a reference to this drive...
                     DriveExtender driveExt = new DriveExtender(driveletter);
                     // Step 1: Formating the USB drive...
@@ -209,7 +221,7 @@ namespace UsbExtractor
                     _progressBar.IsIndeterminate = true;       
                     Task factory = Task.Factory.StartNew(() =>
                     {
-                        driveExt.Format(ftype, ptype, volumelabel.Trim(), clustersize, quickformat);
+                        driveExt.Format(ftype, ptype, volumelabel, clustersize, quickformat);
                     });
                     do { DoEvents(); } while (!factory.IsCompleted);
                     _progressBar.IsIndeterminate = false;
@@ -230,8 +242,18 @@ namespace UsbExtractor
                     ExtractISO(filename, driveletter + ":\\");
                     _startcancelButton.Content = "START";
                     DeleteDirectory(driveletter + ":\\[BOOT]", true);
+                    // Step 3: Setting autorun.inf, if option is checked...
+                    if (_enableautorunCheckBox.IsChecked==true)
+                    {
+                        File.WriteAllText(driveletter + ":\\autorun.inf", ";Created using Iso2Usb - https://kaustubhpatange.github.io\n" +
+                            "[autorun]\n" +
+                            "icon = autorun.ico\n" +
+                            $"label = {volumelabel}");
+                        File.WriteAllBytes(driveletter + ":\\autorun.ico", Properties.Resources.autorun_icon);
+                    }
+                    // OK everything is done...
                     Log("Done");
-                    _progressBar.Value = 0;
+                    _progressBar.Value = 100;
                     timer2.Stop();
                     Log($"--- Ran for {_min} min {_sec} sec ---");
                     MessageBox.Show("Bootable media has been created!", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -300,7 +322,17 @@ namespace UsbExtractor
             sd.Title = "Choose a path to save data on usb stick as vhd file";
             if (sd.ShowDialog() == true)
             {
-                if (File.Exists(sd.FileName)) File.Delete(sd.FileName);
+                // Check if file exist or not if yes it will delete exisiting one...
+                if (File.Exists(sd.FileName))
+                {
+                    // Check if the file is used by any other process...
+                    if (IsFileLocked(new FileInfo(sd.FileName)))
+                    {
+                        MessageBox.Show("Overwriting not possible, file is in use!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                    else File.Delete(sd.FileName);
+                }              
                 // Starting timer...
                 int _min = 0, _sec = 0;
                 timer2 = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
@@ -333,7 +365,7 @@ namespace UsbExtractor
                 Log($"Copying contents from USB (3\\3)");
                 CopyDir(volumeLabel + ":\\","Q:\\");
                 // Ejecting mounted vhd...
-                DriveExtender.DiskPart(new string[] { $"select volume q", "remove" });
+                DriveExtender.DiskPart(new string[] { $"select vdisk file=\"{sd.FileName}\"", "detach vdisk" });
                 Log($"Done");
                 timer2.Stop();
                 Enable();
@@ -342,7 +374,170 @@ namespace UsbExtractor
                 _progressBar.Value = 0;
             }
         }
+        /// <summary>
+        /// This event will occur when checksum button is clicked from status bar...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _checksum_Click(object sender, RoutedEventArgs e)
+        {
+            // Check if the file is used by any other process...
+            if (IsFileLocked(new FileInfo(filename)))
+            {
+                MessageBox.Show("Hash calculating is not possible, file is in use!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            // Starting timer...
+            int _min = 0, _sec = 0;
+            timer2 = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+            {
+                _sec++;
+                if (_sec >= 60) { _min++; _sec = 0; }
+                _progresslabel.Text = $"Running: {_min} min {_sec} sec";
+            }, this.Dispatcher);
+            timer2.Start();
+            Disable(true);
+            _progressBar.IsIndeterminate = true;
+            // Calculating MD5 & SHA1 hash...
+            Task<string[]> task1 = Task.Factory.StartNew(() => {
+                string sha1hash, md5hash;
+                using (var md5 = MD5.Create())
+                {
+                    using (SHA1Managed sha1 = new SHA1Managed())
+                    {
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            var hash1 = sha1.ComputeHash(stream);
+                            var hash2 = md5.ComputeHash(stream);
+                            var sb = new StringBuilder(hash1.Length * 2);
+                            foreach (byte b in hash1)
+                            {
+                                sb.Append(b.ToString("X2"));
+                            }
+                            sha1hash = sb.ToString();
+                            md5hash = BitConverter.ToString(hash2).Replace("-", "").ToLowerInvariant();
+                        }
+                    }
+                }
+                return new string[] { md5hash, sha1hash };
+            });
+            do DoEvents(); while (!task1.IsCompleted);
+            // Wait for 1 seconds before finalizing...
+            Wait(1);
+            USBDetector.hashkeys hash = new USBDetector.hashkeys(task1.Result[0], task1.Result[1]);
+            _progressBar.IsIndeterminate = false;
+            setProgress(0);
+            timer2.Stop();
+            Enable();
+            Log($"--- Ran for {_min} min {_sec} sec ---");
+            hash.ShowDialog();
+        }
+        /// <summary>
+        /// This event will occur when file system combo will change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _filesystemCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedvalue = _filesystemCombo.Items[_filesystemCombo.SelectedIndex] as string;
+            if (selectedvalue.Contains("NTFS"))
+                _clusterCombo.SelectedIndex = 0;
+        }
+        /// <summary>
+        /// This event will occur when info button is clicked from status bar...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _infobutton_Click(object sender, RoutedEventArgs e)
+        {
+            // Displaying About screen...
+            about abt = new about();
+            abt.Owner = this;
+            abt.ShowDialog();
+        }
+        /// <summary>
+        /// This event will occur when check for updates is clicked from status bar...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _checkupdates_Click(object sender, RoutedEventArgs e)
+        {
+            // Check if the setting is checked in application setting file...
+            var ini = new IniFile(settingfile); int index = 0;
+            if (ini.Read("checkupdates", "Settings") == "yes")
+                index = 1;
+            // Display update dialog...
+            update upd = new update(index);
+            upd._checknow.Click += (o, ex) =>
+            {
+                _progressBar.IsIndeterminate = true; string downloadlink = null, version = null;
+                Task<bool> task = Task.Factory.StartNew(() =>
+                {
+                    // Create a temp file...
+                    string tempfile = Path.GetTempFileName();
+                    // Download file into temp file...
+                    WebClient wc = new WebClient();
+                    wc.DownloadFile("https://www.dropbox.com/s/6cup6huzd0y42rd/iso2usb.ini?dl=1",tempfile);
+                    // Read the downloaded ini file using IniFile class...
+                    var inifile = new IniFile(tempfile);
+                    downloadlink = inifile.Read("downloadlink", "Settings");
+                    version = ini.Read("version", "Settings").Replace(".", "");
+                    File.Copy(tempfile, "new.txt");
+                    File.AppendAllText("path.txt", ini.Read("version", "Settings"));
+                    // Check if new version is greater than current version...
+                    if (Convert.ToInt32(version) > Convert.ToInt32(Assembly.GetExecutingAssembly().GetName().Version.ToString().Replace(".", "")))
+                    {
+                        // Update is available...
+                        return true;
+                    }
+                    File.Delete(tempfile);
+                    return false;
+                });
+                do DoEvents(); while (!task.IsCompleted);
+                _progressBar.IsIndeterminate = false;              
+                if (task.Result)
+                {  
+                    // Show the message and let user choose if they want to download the update...
+                    var msg = MessageBox.Show("An update is available for Iso2Usb. Do you want to download it.", "Notice", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (msg == MessageBoxResult.Yes)
+                    {
+                        // Today on 22nd May 2019, I learned a new concept of threading in C# which do some work on other thread without freezing current...
+                        // Actually i was knowing about it but never used it :P
+                        Thread thread = new Thread(() => {
+                            WebClient client = new WebClient();
+                            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                            client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+                            client.DownloadFileAsync(new Uri("https://www.dropbox.com/s/51pbc2dq7vxqhi4/apk_update.exe?dl=1"), $"Iso2Usb_{version}.exe");
+                        });
+                        thread.Start();
+                    }
+                }
+            };
+            upd.Owner = this;
+            upd.ShowDialog();
+        }
+        /// <summary>
+        /// This event will occur when file is downloading...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            double bytesIn = double.Parse(e.BytesReceived.ToString());
+            double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+            double percentage = bytesIn / totalBytes * 100;
+            _progresslabel.Text = "Downloaded " + percentage;
+            _progressBar.Value = int.Parse(Math.Truncate(percentage).ToString());
+        }
+        /// <summary>
+        /// This event will occur when file download is completed...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        { 
 
+        }
         /// <summary>
         /// This will use to analyse iso file...
         /// </summary>
@@ -398,9 +593,15 @@ namespace UsbExtractor
                 _targetCombo.SelectedIndex = 0;
             }
             // Enabling start button...
-            _startcancelButton.IsEnabled = true;
+            if (_usbdriveCombo.Items.Count < 0)
+            {
+                _startcancelButton.IsEnabled = false;
+            }
+            else _startcancelButton.IsEnabled = true;
+            filename = fileName;
             _progressBar.Value = 0;
             _formatpanel.IsEnabled = true;
+            _checksum.Visibility = Visibility.Visible;
             _fileCombo.SelectionChanged += _fileCombo_SelectionChanged;
         }
         /// <summary>
@@ -519,6 +720,7 @@ namespace UsbExtractor
             _fileCombo.IsEnabled = false;
             if (all)
             {
+                _checksum.IsEnabled = false;
                 _createvhd.IsEnabled = false;
                 _main.IsEnabled = false;
                 _main2.IsEnabled = false;
@@ -533,6 +735,7 @@ namespace UsbExtractor
         /// </summary>
         private void Enable()
         {
+            _checksum.IsEnabled = true;
             _formatpanel.IsEnabled = true;
             _fileCombo.IsEnabled = true;
             _main.IsEnabled = true;
@@ -560,7 +763,11 @@ namespace UsbExtractor
                     _startcancelButton.IsEnabled = false;
                     _createvhd.Visibility = Visibility.Collapsed;
                 }
-                else _createvhd.Visibility = Visibility.Visible;
+                else
+                {
+                    if (filename!=null) _startcancelButton.IsEnabled = true;
+                    _createvhd.Visibility = Visibility.Visible;
+                }
                 DetectSize();
                 DetectClusterSize();
             }
@@ -574,7 +781,7 @@ namespace UsbExtractor
         {
             _logTextBox.Text += text + "\n";
             if (!error)
-                _statusLabel.Text = text;
+                _statusLabel.Text = EllipseEnd(text, 63);
         }
         public void KillProcess(string name)
         {
@@ -693,12 +900,51 @@ namespace UsbExtractor
         }
         public void CopyDir(string sourcedir, string destination)
         {
-            _progressBar.IsIndeterminate = true;
-            Task io = Task.Factory.StartNew(() => {
-                DirectoryCopy(sourcedir, destination, true);
-            });
-            do { DoEvents(); } while (!io.IsCompleted);
+            //_progressBar.IsIndeterminate = true;
+            //Task io = Task.Factory.StartNew(() => {
+            //    DirectoryCopy(sourcedir, destination, true);
+            //});
+            //do { DoEvents(); } while (!io.IsCompleted);
+            //_progressBar.IsIndeterminate = false;
+
             _progressBar.IsIndeterminate = false;
+            main = new BackgroundWorker();
+            main.WorkerSupportsCancellation = true;
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0, 0, 3);
+            var mainlength = DirSize(new DirectoryInfo(sourcedir));
+            main.DoWork += (s, e) =>
+            {
+                DirectoryCopy(sourcedir, destination, true);
+            };
+            timer.Tick += (s, e) =>
+            {
+                try
+                {
+                    Task<int> io = Task.Factory.StartNew(() => {
+                        var length = DirSize(new DirectoryInfo(destination));
+                        var calc = Convert.ToInt32(((length * 100) / mainlength));
+                        return calc;
+                    });
+                    do { DoEvents(); } while (!io.IsCompleted);
+                    if (io.Result < 100)
+                    {
+                        Duration duration = new Duration(TimeSpan.FromSeconds(1));
+                        DoubleAnimation doubleanimation = new DoubleAnimation(io.Result, duration);
+                        _progressBar.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
+                    }
+                    else _progressBar.Value = 100;
+                }
+                catch { }
+            };
+            main.RunWorkerAsync();
+            timer.Start();
+            while (main.IsBusy)
+            {
+                DoEvents();
+            }
+            timer.Stop();
+
         }
         public void ExtractISO(string filename, string destination)
         {
@@ -790,7 +1036,8 @@ namespace UsbExtractor
             while (!p.HasExited);
             return text;
         }
-        public static long DirSize(DirectoryInfo d)
+
+        public long DirSize(DirectoryInfo d)
         {
             long size = 0;
             // Add file sizes.
@@ -808,7 +1055,7 @@ namespace UsbExtractor
             }
             return size;
         }
-        public static string SizeSuffix(Int64 value, int decimalPlaces = 1)
+        public string SizeSuffix(Int64 value, int decimalPlaces = 1)
         {
             if (value < 0) { return "-" + SizeSuffix(-value); }
 
@@ -822,6 +1069,58 @@ namespace UsbExtractor
 
             return string.Format("{0:n" + decimalPlaces + "} {1}", dValue, SizeSuffixes[i]);
         }
+        public void setProgress(int val)
+        {
+            Duration duration = new Duration(TimeSpan.FromSeconds(1));
+            DoubleAnimation doubleanimation = new DoubleAnimation(val, duration);
+            _progressBar.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
+            TaskbarItemInfo.ProgressValue = val;
+        }
+        public string EllipseEnd(string input, int length)
+        {
+            if (input == null || input.Length < length)
+                return input;
+            return input.Substring(0, length-5) + "...";
+            //int iNextSpace = input.LastIndexOf(" ", length);
+            //return string.Format("{0}...", input.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+        }
+        public void Wait(double seconds)
+        {
+            var frame = new DispatcherFrame();
+            new Thread((ThreadStart)(() =>
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                frame.Continue = false;
+            })).Start();
+            Dispatcher.PushFrame(frame);
+        }
+
+        public virtual bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
+        }
+        
         public string GetVolumeNumber(string driveletter)
         {
             string VolumeNumber = null;
