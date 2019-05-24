@@ -73,7 +73,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="25"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox Margin="0,0,8,0" Grid.Column="0" Name="_fileCombo"/>
+                            <ComboBox SelectionChanged="_fileCombo_SelectionChanged" Margin="0,0,8,0" Grid.Column="0" Name="_fileCombo"/>
                             <Button ToolTip="Select a file (.iso)" Name="_browseButton" Height="22.5" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Grid.Column="1" Click="_browseButton_Click">
                                 <Image Source="Resources/disk.png"></Image>
                             </Button>

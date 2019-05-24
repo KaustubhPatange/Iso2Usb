@@ -33,6 +33,8 @@ namespace UsbExtractor
         private DriveDetector driveDetector; long volumeSize = 0; string volumeLabel = null, filename = null;
         private string temp; DispatcherTimer timer,timer2; BackgroundWorker main; string syslinux = null;
         string settingfile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\iso2usb.ini";
+        string updatelink = "https://www.dropbox.com/s/6cup6huzd0y42rd/iso2usb.ini?dl=1"; WebClient downloadclient;
+        bool isFileDownloading = false, isCancelled = false; update upd;
         public MainWindow()
         {
             InitializeComponent();
@@ -80,12 +82,15 @@ namespace UsbExtractor
             // Setting some settings for Iso2Usb...
             if (!File.Exists(settingfile))
             {
-                File.WriteAllText(settingfile, "[Settings]\n" +
+                File.WriteAllText(settingfile, "[Settings]"+Environment.NewLine +
                     "checkupdates=yes");
             }
+            // Check for updates...
+            CheckUpdates();
             // Method to detect already connected USBs...
             DetectUSB();
         }
+
         /// <summary>
         /// This event occur when any new usb is inserted.
         /// </summary>
@@ -150,10 +155,10 @@ namespace UsbExtractor
                 _fileCombo.Items.Add(label);
                 try
                 {
+                    // This will automatically call LoadFile function to load properties of the file...
                     _fileCombo.SelectedIndex = _fileCombo.Items.Count - 1;
                 }
                 catch (Exception ex) { Log("Error: " + ex.Message, true); }
-                loadFile(ofd.FileName);
             }
         }
         /// <summary>
@@ -218,13 +223,13 @@ namespace UsbExtractor
                     DriveExtender driveExt = new DriveExtender(driveletter);
                     // Step 1: Formating the USB drive...
                     Log($"Formating '{label.Text}'");
-                    _progressBar.IsIndeterminate = true;       
+                    _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
                     Task factory = Task.Factory.StartNew(() =>
                     {
                         driveExt.Format(ftype, ptype, volumelabel, clustersize, quickformat);
                     });
                     do { DoEvents(); } while (!factory.IsCompleted);
-                    _progressBar.IsIndeterminate = false;
+                    _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                     // Step 1.1: Copying syslinux...
                     Log("Detected Syslinux: " + syslinux);
                     switch(syslinux)
@@ -253,7 +258,7 @@ namespace UsbExtractor
                     }
                     // OK everything is done...
                     Log("Done");
-                    _progressBar.Value = 100;
+                    _progressBar.Value = 100; TaskbarItemInfo.ProgressValue = 1;
                     timer2.Stop();
                     Log($"--- Ran for {_min} min {_sec} sec ---");
                     MessageBox.Show("Bootable media has been created!", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -262,9 +267,16 @@ namespace UsbExtractor
             }
             else
             {
+                // Stop the process for downloading file...
+                if (isFileDownloading)
+                {
+                    isCancelled = true;
+                    downloadclient.CancelAsync();
+                    return;
+                }
                 // Stop the process of extraction from here...
                 Disable();
-                _progressBar.IsIndeterminate = true;
+                _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
                 Log($"Cancelling... Please Wait!");
                 timer.Stop(); timer2.Stop(); main.CancelAsync();
                 _progressBar.Foreground = new SolidColorBrush(Colors.Yellow);
@@ -276,16 +288,16 @@ namespace UsbExtractor
                       KillProcess("7z.exe");
                 });
                 do { DoEvents(); } while (!run.IsCompleted);
-                _progressBar.IsIndeterminate = false;
+                _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                 Log($"Done");
                 Enable();
-                _progressBar.Value = 0;
+                _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
                 return;
             }
-            _progressBar.IsIndeterminate = false;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             DetectUSB();
             Enable();
-            _progressBar.Value = 0;
+            _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
         }
         /// <summary>
         /// This event will occur when value in file selection combo box is changed
@@ -348,7 +360,7 @@ namespace UsbExtractor
                 CreateEmptyVHD(sd.FileName);
                 // We will now mount it by formatting it first...
                 Log($"Mounting vhd as partition (2\\3)");
-                _progressBar.IsIndeterminate = true;
+                _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
                 Task task1 = Task.Factory.StartNew(() => {
                     DriveExtender.DiskPart(new string[] {
                         $"select vdisk file=\"{sd.FileName}\"",
@@ -360,7 +372,7 @@ namespace UsbExtractor
                     });
                 });
                 do DoEvents(); while (!task1.IsCompleted);
-                _progressBar.IsIndeterminate = false;
+                _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                 // Now let's copy file on the disk...
                 Log($"Copying contents from USB (3\\3)");
                 CopyDir(volumeLabel + ":\\","Q:\\");
@@ -371,7 +383,7 @@ namespace UsbExtractor
                 Enable();
                 Log($"--- Ran for {_min} min {_sec} sec ---");
                 MessageBox.Show("VHD file has been created at given location!", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
-                _progressBar.Value = 0;
+                _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
             }
         }
         /// <summary>
@@ -397,7 +409,7 @@ namespace UsbExtractor
             }, this.Dispatcher);
             timer2.Start();
             Disable(true);
-            _progressBar.IsIndeterminate = true;
+            _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             // Calculating MD5 & SHA1 hash...
             Task<string[]> task1 = Task.Factory.StartNew(() => {
                 string sha1hash, md5hash;
@@ -425,7 +437,7 @@ namespace UsbExtractor
             // Wait for 1 seconds before finalizing...
             Wait(1);
             USBDetector.hashkeys hash = new USBDetector.hashkeys(task1.Result[0], task1.Result[1]);
-            _progressBar.IsIndeterminate = false;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             setProgress(0);
             timer2.Stop();
             Enable();
@@ -462,59 +474,73 @@ namespace UsbExtractor
         /// <param name="e"></param>
         private void _checkupdates_Click(object sender, RoutedEventArgs e)
         {
-            // Check if the setting is checked in application setting file...
-            var ini = new IniFile(settingfile); int index = 0;
-            if (ini.Read("checkupdates", "Settings") == "yes")
-                index = 1;
-            // Display update dialog...
-            update upd = new update(index);
-            upd._checknow.Click += (o, ex) =>
+            // Check if the internet connection is available or not...
+            if (CheckForInternetConnection())
             {
-                _progressBar.IsIndeterminate = true; string downloadlink = null, version = null;
-                Task<bool> task = Task.Factory.StartNew(() =>
+                // Check if the setting is checked in application setting file...
+                var ini = new IniFile(File.ReadAllText(settingfile)); int index = 0;
+                if (ini.Read("checkupdates") == "yes")
+                    index = 1;
+                // Display update dialog...
+                upd = new update(index);
+                upd._checknow.Click += CheckforUpdates;
+                upd.Owner = this;
+                upd.ShowDialog();
+            }
+            else MessageBox.Show("No active internet connection", "Notice", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+ 
+        /// <summary>
+        /// This is out main function to check for updates...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void CheckforUpdates(object sender, RoutedEventArgs e)
+        {
+            _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
+            string downloadlink = null, version = null;
+            Task<bool> task = Task.Factory.StartNew(() =>
+            {
+                // Download file into memory stream...
+                WebClient wc = new WebClient();
+                using (MemoryStream stream = new MemoryStream(wc.DownloadData(updatelink)))
                 {
-                    // Create a temp file...
-                    string tempfile = Path.GetTempFileName();
-                    // Download file into temp file...
-                    WebClient wc = new WebClient();
-                    wc.DownloadFile("https://www.dropbox.com/s/6cup6huzd0y42rd/iso2usb.ini?dl=1",tempfile);
                     // Read the downloaded ini file using IniFile class...
-                    var inifile = new IniFile(tempfile);
-                    downloadlink = inifile.Read("downloadlink", "Settings");
-                    version = ini.Read("version", "Settings").Replace(".", "");
-                    File.Copy(tempfile, "new.txt");
-                    File.AppendAllText("path.txt", ini.Read("version", "Settings"));
-                    // Check if new version is greater than current version...
-                    if (Convert.ToInt32(version) > Convert.ToInt32(Assembly.GetExecutingAssembly().GetName().Version.ToString().Replace(".", "")))
-                    {
-                        // Update is available...
-                        return true;
-                    }
-                    File.Delete(tempfile);
-                    return false;
-                });
-                do DoEvents(); while (!task.IsCompleted);
-                _progressBar.IsIndeterminate = false;              
-                if (task.Result)
-                {  
-                    // Show the message and let user choose if they want to download the update...
-                    var msg = MessageBox.Show("An update is available for Iso2Usb. Do you want to download it.", "Notice", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                    if (msg == MessageBoxResult.Yes)
-                    {
-                        // Today on 22nd May 2019, I learned a new concept of threading in C# which do some work on other thread without freezing current...
-                        // Actually i was knowing about it but never used it :P
-                        Thread thread = new Thread(() => {
-                            WebClient client = new WebClient();
-                            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
-                            client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
-                            client.DownloadFileAsync(new Uri("https://www.dropbox.com/s/51pbc2dq7vxqhi4/apk_update.exe?dl=1"), $"Iso2Usb_{version}.exe");
-                        });
-                        thread.Start();
-                    }
+                    string text = new StreamReader(stream).ReadToEnd();
+                    var inifile = new IniFile(text);
+                    downloadlink = inifile.Read("downloadlink");
+                    version = inifile.Read("version").Replace(".", "");
                 }
-            };
-            upd.Owner = this;
-            upd.ShowDialog();
+                // Check if new version is greater than current version...
+                if (Convert.ToInt32(version) > Convert.ToInt32(Assembly.GetExecutingAssembly().GetName().Version.ToString().Replace(".", "")))
+                {
+                    // Update is available...
+                    return !File.Exists($"Iso2Usb_{version}.exe");
+                }
+                return false;
+            });
+            var isupdate = await task;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+            if (isupdate)
+            {
+                // Show the message and let user choose if they want to download the update...
+                var msg = MessageBox.Show("An update is available for Iso2Usb. Do you want to download it.", "Notice", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (msg == MessageBoxResult.Yes)
+                {
+                    // Close the update dialog first...
+                    try { upd.Close(); } catch { }
+                    Disable(true); isFileDownloading = true;
+                    // Let's set and download the new file...
+                    downloadclient = new WebClient();
+                    downloadclient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    downloadclient.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+                    // Let's set some cancel options...
+                    _startcancelButton.IsEnabled = true;
+                    _startcancelButton.Content = "CANCEL";
+                    // Starting the download
+                    downloadclient.DownloadFileAsync(new Uri(downloadlink), $"Iso2Usb_{version}.exe");
+                }
+            }
         }
         /// <summary>
         /// This event will occur when file is downloading...
@@ -526,8 +552,9 @@ namespace UsbExtractor
             double bytesIn = double.Parse(e.BytesReceived.ToString());
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
-            _progresslabel.Text = "Downloaded " + percentage;
+            _progresslabel.Text = "Downloaded " + Math.Round(percentage,2)+"%";
             _progressBar.Value = int.Parse(Math.Truncate(percentage).ToString());
+            TaskbarItemInfo.ProgressValue = _progressBar.Value / 100.00;
         }
         /// <summary>
         /// This event will occur when file download is completed...
@@ -535,8 +562,13 @@ namespace UsbExtractor
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-        { 
-
+        {
+            setProgress(0); isFileDownloading = false;
+            Enable();
+            if (_usbdriveCombo.Items.Count <= 0 && filename==null) { _startcancelButton.IsEnabled = false; }
+            if (!isCancelled)
+                MessageBox.Show("Update has been downloaded in the current folder","Notice",MessageBoxButton.OK,MessageBoxImage.Information);
+            else { isCancelled = false; _startcancelButton.Content = "START"; }
         }
         /// <summary>
         /// This will use to analyse iso file...
@@ -544,9 +576,8 @@ namespace UsbExtractor
         /// <param name="fileName"></param>
         private void loadFile(string fileName)
         {
-            _progressBar.Value = 20;
+            _progressBar.Value = 20; TaskbarItemInfo.ProgressValue = 0.20;
             _formatpanel.IsEnabled = false;
-            _fileCombo.SelectionChanged -= _fileCombo_SelectionChanged;
             Execute(temp + "\\7z.exe", $"x -y \"{fileName}\" -o\"{temp}\" isolinux");
             if (Directory.Exists(temp + "\\isolinux"))
             {
@@ -565,7 +596,7 @@ namespace UsbExtractor
                 {
                     _labelTextBox.Text = Path.GetFileNameWithoutExtension(fileName);
                 }
-                _progressBar.Value = 100;
+                _progressBar.Value = 100; TaskbarItemInfo.ProgressValue = 1;
                 // Detect syslinux version...
                 syslinux = DetectSyslinuxVersion(temp + "\\isolinux");
                 // Since it is linux the Partition Type should be checked as MBR by default...
@@ -583,7 +614,7 @@ namespace UsbExtractor
                  */
                 Log($"Detected '{Path.GetFileName(fileName)}' file as unix iso");
                 // Setting volume label from file name...
-                _progressBar.Value = 100;
+                _progressBar.Value = 100; TaskbarItemInfo.ProgressValue = 1;
                 _labelTextBox.Text = Path.GetFileNameWithoutExtension(fileName);
                 // Unix based system uses GPT partition...
                 _partitionCombo.SelectedIndex = 1;
@@ -599,10 +630,26 @@ namespace UsbExtractor
             }
             else _startcancelButton.IsEnabled = true;
             filename = fileName;
-            _progressBar.Value = 0;
+            _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
             _formatpanel.IsEnabled = true;
             _checksum.Visibility = Visibility.Visible;
-            _fileCombo.SelectionChanged += _fileCombo_SelectionChanged;
+        }
+        /// <summary>
+        /// This function will be used to check for updates if setting is set to yes...
+        /// </summary>
+        private void CheckUpdates()
+        {
+            // Check if the internet connection is available or not...
+            if (CheckForInternetConnection())
+            {
+                if (new IniFile(File.ReadAllText(settingfile)).Read("checkupdates") == "yes")
+                {
+                    // Setting is set to yes, we can check for updates...
+                    _logTextBox.AppendText("Checking for updates...\n");
+                    _logTextBox.AppendText("[*] This can be disable from update button!\n");
+                    CheckforUpdates(this, new RoutedEventArgs());
+                }
+            }            
         }
         /// <summary>
         /// This will use to get some default properties for selected USB drive...
@@ -744,7 +791,7 @@ namespace UsbExtractor
             _createvhd.IsEnabled = true;
             _browseButton.IsEnabled = true;
             _progresslabel.Text = "";
-            _progressBar.Value = 0;
+            _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
             _statusLabel.Text = "Ready...";
             driveDetector = new DriveDetector();
             driveDetector.DeviceArrived += new DriveDetectorEventHandler(OnDriveArrived);
@@ -891,12 +938,12 @@ namespace UsbExtractor
         }
         public void CreateEmptyVHD(string filename)
         {
-            _progressBar.IsIndeterminate = true;
+            _progressBar.IsIndeterminate = true; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             Task task = Task.Factory.StartNew(() => {
                 DriveExtender.DiskPart(new string[] { $"create vdisk file=\"{filename}\" maximum={volumeSize / (1024 * 1024)}" });
             });
             do { DoEvents(); } while (!task.IsCompleted);
-            _progressBar.IsIndeterminate = false;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
         }
         public void CopyDir(string sourcedir, string destination)
         {
@@ -907,7 +954,7 @@ namespace UsbExtractor
             //do { DoEvents(); } while (!io.IsCompleted);
             //_progressBar.IsIndeterminate = false;
 
-            _progressBar.IsIndeterminate = false;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             main = new BackgroundWorker();
             main.WorkerSupportsCancellation = true;
             timer = new DispatcherTimer();
@@ -933,7 +980,7 @@ namespace UsbExtractor
                         DoubleAnimation doubleanimation = new DoubleAnimation(io.Result, duration);
                         _progressBar.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
                     }
-                    else _progressBar.Value = 100;
+                    else _progressBar.Value = 100; TaskbarItemInfo.ProgressValue = 1;
                 }
                 catch { }
             };
@@ -948,7 +995,7 @@ namespace UsbExtractor
         }
         public void ExtractISO(string filename, string destination)
         {
-            _progressBar.IsIndeterminate = false;
+            _progressBar.IsIndeterminate = false; TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             main = new BackgroundWorker();
             main.WorkerSupportsCancellation = true;
             timer = new DispatcherTimer();
@@ -974,7 +1021,7 @@ namespace UsbExtractor
                         DoubleAnimation doubleanimation = new DoubleAnimation(io.Result, duration);
                         _progressBar.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
                     }
-                    else _progressBar.Value = 100;
+                    else _progressBar.Value = 100; TaskbarItemInfo.ProgressValue = 1;
                 }
                 catch { }
             };
@@ -1054,6 +1101,21 @@ namespace UsbExtractor
                 size += DirSize(di);
             }
             return size;
+        }
+        public static bool CheckForInternetConnection()
+        {
+            try
+            {
+                using (var client = new WebClient())
+                using (var stream = client.OpenRead("http://www.google.com"))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
         public string SizeSuffix(Int64 value, int decimalPlaces = 1)
         {

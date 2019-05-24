@@ -32,7 +32,7 @@ C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\De
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\Iso2Usb.pdb
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\USBDetector\hashkeys.g.cs
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\USBDetector\hashkeys.baml
-C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\UsbExtractor.csprojAssemblyReference.cache
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\UsbExtractor.csproj.CoreCompileInputs.cache
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\update.g.cs
 C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\update.baml
+C:\Users\Dell\Documents\Visual Studio 2017\Projects\Iso2Linux\src\Windows\obj\Debug\UsbExtractor.csprojAssemblyReference.cache
