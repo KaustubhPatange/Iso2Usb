@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.image.Image?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="531.0" prefWidth="617.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Code.Controller">
+   <children>
+      <fx:define>
+         <Image fx:id="brimage" requestedHeight="16" requestedWidth="16" url="@images/disk.png" />
+         <Image fx:id="about" requestedHeight="22" requestedWidth="22" url="@images/info.png" />
+         <Image fx:id="web" requestedHeight="22" requestedWidth="22" url="@images/web.png" />
+         <Image fx:id="hash" requestedHeight="22" requestedWidth="22" url="@images/checksum.png" />
+         <Image fx:id="checkupdate" requestedHeight="20" requestedWidth="20" url="@images/update.png" />
+      </fx:define>
+      <Label layoutX="13.0" layoutY="10.0" text="General">
+         <font>
+            <Font name="System Bold" size="11.0" />
+         </font>
+      </Label>
+      <Separator layoutX="73.0" layoutY="17.0" prefHeight="3.0" prefWidth="531.0" />
+      <Label layoutX="13.0" layoutY="33.0" text="USB Drive" />
+      <ComboBox fx:id="usbDriveComBo" layoutX="14.0" layoutY="54.0" prefHeight="26.0" prefWidth="311.0" />
+      <Label layoutX="338.0" layoutY="33.0" text="Select File" />
+      <ComboBox fx:id="fileComBo" layoutX="338.0" layoutY="54.0" prefHeight="26.0" prefWidth="220.0" />
+      <Label layoutX="14.0" layoutY="90.0" text="Format">
+         <font>
+            <Font name="System Bold" size="11.0" />
+         </font>
+      </Label>
+      <Separator layoutX="68.0" layoutY="97.0" prefHeight="3.0" prefWidth="531.0" />
+      <Button fx:id="browseButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="2.0" layoutX="568.0" layoutY="54.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="35.0">
+         <graphic>
+            <ImageView image="$brimage"/>
+         </graphic>
+         <tooltip>
+            <Tooltip text="Select an iso file from here." />
+         </tooltip>
+      </Button>
+      <Label layoutX="14.0" layoutY="113.0" text="Volume Label" />
+      <TextField layoutX="14.0" layoutY="136.0" prefHeight="26.0" prefWidth="373.0" />
+      <Label layoutX="398.0" layoutY="113.0" text="Partition Type" />
+      <ComboBox fx:id="partitionCombo" layoutX="398.0" layoutY="136.0" prefHeight="26.0" prefWidth="206.0" />
+      <Label layoutX="13.0" layoutY="172.0" text="File System" />
+      <ComboBox fx:id="fileSystemCombo" layoutX="13.0" layoutY="193.0" prefHeight="26.0" prefWidth="199.0" />
+      <Label layoutX="223.0" layoutY="172.0" text="Cluster Size" />
+      <ComboBox fx:id="clusterCombo" layoutX="223.0" layoutY="193.0" prefHeight="26.0" prefWidth="199.0" />
+      <Label layoutX="434.0" layoutY="172.0" text="Target System" />
+      <ComboBox fx:id="targetCombo" layoutX="434.0" layoutY="193.0" prefHeight="26.0" prefWidth="169.0" />
+      <CheckBox layoutX="14.0" layoutY="230.0" mnemonicParsing="false" selected="true" text="Quick Format">
+         <tooltip>
+            <Tooltip text="If not checked, the tool will scan for bad blocks." />
+         </tooltip></CheckBox>
+      <CheckBox layoutX="14.0" layoutY="256.0" mnemonicParsing="false" selected="true" text="Create icon and label files (autorun.inf)">
+         <tooltip>
+            <Tooltip text="If checked, it will create extended icons and lable files." />
+         </tooltip></CheckBox>
+      <Label layoutX="13.0" layoutY="284.0" text="Status">
+         <font>
+            <Font name="System Bold" size="11.0" />
+         </font>
+      </Label>
+      <Separator layoutX="67.0" layoutY="291.0" prefHeight="3.0" prefWidth="531.0" />
+      <ProgressBar fx:id="progressBar" layoutX="14.0" layoutY="307.0" prefHeight="26.0" prefWidth="485.0" progress="0.0" />
+      <Button fx:id="startCancelButton" layoutX="510.0" layoutY="307.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="89.0" text="START" />
+      <Label layoutX="13.0" layoutY="343.0" text="Logs">
+         <font>
+            <Font name="System Bold" size="11.0" />
+         </font>
+      </Label>
+      <Separator layoutX="52.0" layoutY="350.0" prefHeight="3.0" prefWidth="545.0" />
+      <TextArea fx:id="logTextArea" layoutX="14.0" layoutY="367.0" prefHeight="119.0" prefWidth="584.0" />
+      <AnchorPane layoutY="499.0" prefHeight="32.0" prefWidth="617.0" style="-fx-background-color: #E9E9E9;">
+         <ImageView image="$about" fx:id="aboutButton" layoutX="578" layoutY="5">
+            <cursor>
+               <Cursor fx:constant="CLOSED_HAND" />
+            </cursor></ImageView>
+         <ImageView image="$web" fx:id="webButton" layoutX="548" layoutY="5">
+            <cursor>
+               <Cursor fx:constant="CLOSED_HAND" />
+            </cursor></ImageView>
+         <ImageView image="$hash" fx:id="hashButton" layoutX="520" layoutY="5">
+            <cursor>
+               <Cursor fx:constant="CLOSED_HAND" />
+            </cursor></ImageView>
+         <ImageView image="$checkupdate" fx:id="updateButton" layoutX="492" layoutY="6">
+            <cursor>
+               <Cursor fx:constant="CLOSED_HAND" />
+            </cursor></ImageView>
+         <Label fx:id="statusLabel" layoutX="13" layoutY="7" text="Ready..." />
+      </AnchorPane>
+   </children>
+</AnchorPane>

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Iso2Usb:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Iso2Usb_jar</output-path>
+    <root id="archive" name="Iso2Usb.jar">
+      <element id="module-output" name="untitled" />
+    </root>
+  </artifact>
+</component>

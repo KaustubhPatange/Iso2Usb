@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="234.0" prefWidth="363.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Code.Windows.about">
+   <children>
+      <ImageView fitHeight="79.0" fitWidth="121.0" layoutX="143.0" layoutY="20.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../icon.png" />
+         </image></ImageView>
+      <Separator layoutX="53.0" layoutY="108.0" prefHeight="1.0" prefWidth="257.0" />
+      <Label layoutX="46.0" layoutY="140.0" prefHeight="42.0" prefWidth="283.0" text="A utlity to create boottable storage devices from ISO images" textAlignment="CENTER" wrapText="true" />
+      <Label layoutX="151.0" layoutY="120.0" text="Iso2Usb">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <ImageView fx:id="github_button" fitHeight="30.0" fitWidth="31.0" layoutX="142.0" layoutY="190.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/github.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="CLOSED_HAND" />
+         </cursor>
+      </ImageView>
+      <ImageView fx:id="visitweb_button" fitHeight="27.0" fitWidth="28.0" layoutX="192.0" layoutY="192.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/visitweb.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="CLOSED_HAND" />
+         </cursor>
+      </ImageView>
+   </children>
+</AnchorPane>

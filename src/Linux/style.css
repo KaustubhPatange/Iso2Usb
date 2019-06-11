@@ -1,0 +1,75 @@
+body {
+    text-align: center;
+    font-family: 'Lato',sans-serif;
+    color: black;
+    background-color: #E5E2E5;
+    
+    margin-top: 20px;
+   
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.headerclass {
+    border-radius: 5px;
+    background-color: #3D3D3D;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right:10px;
+    padding-left: 10px;
+}
+.imageclass {
+    height: 55px; margin-right: 10px;margin-bottom: 2px;margin-top: 2px;
+}
+.donatebutton {
+    border: 1px solid #3D3D3D; 
+    border-radius: 5px; 
+    display: inline-block; 
+    left: auto; 
+    right: auto;
+    padding: 5px;
+    font-weight: bold;
+}
+.changelogview {
+    width: auto;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-bottom: 5px;
+    margin-top: 13px;
+    border-radius: 4px;
+    background: #F5F5F5;
+    border: 1px solid #CCCCCC;
+}
+.headerbuttons {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-right: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    color: white;
+    background-color: #3D3D3D;
+    border: 1px solid rgb(46, 45, 45);
+    text-decoration: none;
+}
+.headerbuttons:hover {
+    background-color: rgb(46, 45, 45);
+}
+.buttonclass {
+    display: inline-block; 
+    width: 200px;
+    text-decoration: none;
+    background-color:  rgb(58, 99, 165);
+    color: white;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #2e6da4;
+  }
+.buttonclass:hover {
+    background-color: rgb(45, 78, 133);
+  }
+.maintext {
+    font-size: 2.2em;
+    color: #fff;
+}
