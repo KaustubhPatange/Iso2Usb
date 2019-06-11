@@ -105,7 +105,15 @@ namespace UsbExtractor
                 {
                     // Add the drive...
                     TextBlock label = new TextBlock();
-                    label.Text = drive.VolumeLabel + " (" + drive.Name.Replace("\\", "") + ") [" + SizeSuffix(drive.TotalSize) + "]";
+                    string volumelabel = "NO_LABEL";
+                    long totalsize = 0;
+                    try
+                    {
+                        volumelabel = drive.VolumeLabel;
+                        totalsize = drive.TotalSize;
+                    }
+                    catch { }
+                    label.Text = volumelabel + " (" + drive.Name.Replace("\\", "") + ") [" + SizeSuffix(totalsize) + "]";
                     label.Tag = drive.Name.Remove(drive.Name.Length - 2);
                     _usbdriveCombo.Items.Add(label);
                     Log("USB Inserted in volume " + drive.Name.Replace("\\", ""));
@@ -690,7 +698,15 @@ namespace UsbExtractor
                         {
                             // Add the drive...
                             TextBlock label = new TextBlock();
-                            label.Text = drive.VolumeLabel + " (" + drive.Name.Replace("\\", "") + ") [" + SizeSuffix(drive.TotalSize) + "]";
+                            string volumelabel = "NO_LABEL";
+                            long totalsize = 0;
+                            try
+                            {
+                                volumelabel = drive.VolumeLabel;
+                                totalsize = drive.TotalSize;
+                            }
+                            catch { }
+                            label.Text = volumelabel + " (" + drive.Name.Replace("\\", "") + ") [" + SizeSuffix(totalsize) + "]";
                             label.Tag = drive.Name.Remove(drive.Name.Length - 2);
                             _usbdriveCombo.Items.Add(label);
                             break;
