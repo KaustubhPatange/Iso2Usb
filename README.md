@@ -23,7 +23,7 @@
 * Setup [Java JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) which includes JavaFx source and [Intellij IDEA](https://snapcraft.io/intellij-idea-community)
 * In Intellij, select File > Open project and select folder from src/Linux
 
-f you get any compiling error, make sure to set your default java jdk as jdk8. Also let me know you, the project will not compile over jdk11+ environment since oracle decided to remove JavaFX from package.
+If you get any compiling error, make sure to set your default java jdk as jdk8. Also let me know you, the project will not compile over jdk11+ environment since oracle decided to remove JavaFX from package.
 
 ## License
 
