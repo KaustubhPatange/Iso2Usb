@@ -15,6 +15,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import sun.rmi.runtime.Log;
 
 import java.io.FileWriter;
 import java.net.URL;

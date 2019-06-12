@@ -1,8 +1,12 @@
 package Code;
 
+import sun.rmi.runtime.Log;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommonClass {
     public static void write(String filename,String contents) {
@@ -51,6 +55,15 @@ public class CommonClass {
         File f = new File(filename);
         return f.exists();
     }
+    public static boolean keyExistSetting(String key) {
+        String readtoEnd = read(".iso2usb");
+        Pattern p = Pattern.compile(key+"(,*?)\\=");
+        Matcher m = p.matcher(readtoEnd);
+        while (m.find()) {
+            return true;
+        }
+        return false;
+    }
     public static String readSetting(String key) {
         String readtoEnd = read(".iso2usb");
         if (readtoEnd.contains(key)) {
@@ -67,6 +80,7 @@ public class CommonClass {
         if (!f.exists())
             write(".iso2usb","");
         String readtoEnd = read(".iso2usb");
+        System.out.println(readtoEnd);
         if (readtoEnd.contains(key)) {
             String tojoin="";
             for(String line : readtoEnd.split("\r|\n")) {
@@ -76,7 +90,7 @@ public class CommonClass {
             }
             write(".iso2usb",tojoin);
         } else {
-            append(".iso2usb","--"+key+"="+value);
+            append(".iso2usb",readtoEnd+"--"+key+"="+value);
         }
     }
 }

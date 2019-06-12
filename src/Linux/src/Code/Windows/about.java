@@ -20,7 +20,14 @@ public class about implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         github_button.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             try {
-                new ProcessBuilder("x-www-browser", "https://google.com").start();
+                new ProcessBuilder("x-www-browser", "https://github.com/KaustubhPatange/Iso2Usb").start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        visitweb_button.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            try {
+                new ProcessBuilder("x-www-browser", "https://kaustubhpatange.github.io/Iso2Usb").start();
             } catch (IOException e) {
                 e.printStackTrace();
             }

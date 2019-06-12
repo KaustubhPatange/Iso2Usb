@@ -1,5 +1,6 @@
 package Code;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -21,8 +22,10 @@ import javafx.stage.Stage;
 import java.io.*;
 
 import Code.Windows.*;
+import sun.rmi.runtime.Log;
 
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -85,18 +88,20 @@ public class Controller implements Initializable {
     @FXML
     private CheckBox createicon;
 
-
+    // Change this with new release
+    String CURRENT_VERSION="0150";
 
     DetectUsb usb; Thread usbtask; StartTimer timerthread; Timer maintimer; String username,password;
     ArrayList<String> usbDrivelist; ExtractISO mainiso;
     ArrayList<String> size, filenames;  int min = 0, sec = 0;
     ArrayList<String> location; String clustersize="",volumelabel="",filename="",syslinux="";
-    double volumeSize; String temppath="/tmp/iso2usb";
+    double volumeSize; String temppath="/tmp/iso2usb",updatelink = "https://www.dropbox.com/s/6cup6huzd0y42rd/iso2usb.ini?dl=1";;
     Stage stage; boolean bool; String filesystemtype; boolean isStarted,isfullstarted;
-    Process isoextract, ddprocess;
+    Process isoextract, ddprocess; FXMLLoader mainFXMLLoader;
 
-    public void setStage(Stage stage) {
+    public void setStage(Stage stage, FXMLLoader loader) {
         this.stage = stage;
+        this.mainFXMLLoader = loader;
     }
 
     @Override
@@ -104,23 +109,28 @@ public class Controller implements Initializable {
         usbDrivelist = new ArrayList<>();
         filenames = new ArrayList<>();
 
+        File f = new File(".iso2usb");
+        Log(f.getAbsolutePath());
+
         // Making the log box read only
         logTextArea.setEditable(false);
 
         // Getting username of current user
         username = System.getProperty("user.name");
-        // Logging it just to ensure if it works
-        Log(username);
 
         // Set sudo password first
         sudoAskPassword();
+
+        // Setting update settings
+        if (!CommonClass.keyExistSetting("autoupdate")) {
+            CommonClass.writeSetting("autoupdate","yes");
+        }
 
         // Create temporary directory for work
         ExecuteShell("sudo rm -rf "+temppath);
         new File(temppath).mkdirs();
 
         // Setting events of components
-       // stage.setOnCloseRequest(e->onClose());
         partitionCombo.getItems().addAll("MBR","GPT"); partitionCombo.getSelectionModel().select(0);
         partitionCombo.disableProperty().setValue(true);
        /*  Disabling partitionCombo since converting between MBR and GPT is not recommended and used for only
@@ -141,16 +151,44 @@ public class Controller implements Initializable {
         browseButton.setOnAction(e->setBrowseButton());
         startCancelButton.setOnAction(e->setStartCancelButton());
         hashButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> setHashButton());
-        ddsave.addEventHandler(MouseEvent.MOUSE_CLICKED, e-> setDdsave());
+        ddsave.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> setDdsave());
         aboutButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> showAbout());
+        updateButton.addEventHandler(MouseEvent.MOUSE_CLICKED,event -> setUpdateButton());
+        webButton.addEventHandler(MouseEvent.MOUSE_CLICKED,event -> {
+            // Load website into default browser
+            try {
+                new ProcessBuilder("x-www-browser", "https://github.com/KaustubhPatange/Iso2Usb").start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
         // Disabling controls first
         hashButton.disableProperty().setValue(true);
         ddsave.disableProperty().setValue(true);
-        Disable(); startCancelButton.disableProperty().setValue(true);
+        Disable();
 
-        // Running usbTask
-        runUsbTask(false);
+        // Checking for updates
+        checkForUpdates();
+
+    }
+
+    // This event will show update dialog
+    private void setUpdateButton() {
+        Parent root = null;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Windows/updates.fxml"));
+            root = fxmlLoader.load();
+            Stage primaryStage = new Stage();
+            primaryStage.setTitle("Updates");
+            ((updates) fxmlLoader.getController()).setStage(primaryStage,mainFXMLLoader);
+            Scene scene = new Scene(root, 362, 155);
+            primaryStage.setScene(scene);
+            primaryStage.setResizable(false);
+            primaryStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // This event will occur when dd_save button is clicked
@@ -400,8 +438,19 @@ public class Controller implements Initializable {
     }
 
     // This event will occur when main application is closed
-    private void onClose() {
+    public void onClose() {
         ExecuteShell("rm -rf "+temppath);
+
+        // Disabling background events
+        usb.cancel(true);
+        try {
+            usbtask.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        maintimer.cancel();
+        Platform.exit();
+        System.exit(0);
     }
 
     // This event will occur when value in fileCombo will change
@@ -470,7 +519,7 @@ public class Controller implements Initializable {
         Enable();
         createAlert("Information",
                 "Information"
-                ,"Bootable media has been created!",Alert.AlertType.INFORMATION);
+                ,"Bootable media has been created!",Alert.AlertType.INFORMATION,ButtonType.OK);
         progressBar.setProgress(0);
         runUsbTask(false);
     }
@@ -619,6 +668,9 @@ public class Controller implements Initializable {
         if (usbDriveComBo.getItems().size()>index) {
             usbDriveComBo.getSelectionModel().select(index);
         }
+        if (usbDriveComBo.getItems().size()>0 && fileComBo.getItems().size()>0) {
+            startCancelButton.disableProperty().setValue(false);
+        }
         if (index==-1) {
             usbDriveComBo.getSelectionModel().select(0);
         }
@@ -688,7 +740,6 @@ public class Controller implements Initializable {
 
     // This method will be used to set sudo password at beginning..
     private void sudoAskPassword() {
-
         String pass = CommonClass.readSetting("pass");
         if (!pass.isEmpty()) {
             password = pass;
@@ -871,10 +922,10 @@ public class Controller implements Initializable {
         return bool;
     }
     // A custom alert that needs title and header text as parameters
-    private boolean createAlert(String title, String headerText, String message, Alert.AlertType type) {
+    private boolean createAlert(String title, String headerText, String message, Alert.AlertType type,ButtonType... buttonTypes) {
         Alert alert = new Alert(type);
         alert.getButtonTypes().clear();
-        alert.getButtonTypes().addAll(ButtonType.OK);
+        alert.getButtonTypes().addAll(buttonTypes);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.setContentText(message);
@@ -905,6 +956,87 @@ public class Controller implements Initializable {
             }
         }
     }
+
+    // This method will be used to check updates
+    private void checkForUpdates() {
+        if (CommonClass.readSetting("autoupdate").contains("yes") && checkForConnection()) {
+            logTextArea.appendText("Checking for updates\n");
+            logTextArea.appendText("[*] This can be disable from update button!\n");
+            Disable(true);
+            CheckUpdates();
+        }
+    }
+    public void CheckUpdates() {
+        progressBar.setProgress(-1);
+        new Thread(new Task<Void>() {
+            String version = "0";
+            boolean showupdate=false;
+
+            @Override
+            protected Void call() throws Exception {
+                // Reading stream from url
+                URL url = new URL(updatelink);
+                BufferedReader br;
+                try {
+                    br = new BufferedReader(new InputStreamReader(url.openStream()));
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.equalsIgnoreCase("quit")) {
+                            break;
+                        }
+                        Pattern p = Pattern.compile("version(.*?)\\=");
+                        Matcher m = p.matcher(line);
+                        while (m.find()) {
+                            version = line.split("=")[1].trim().replace(".","");
+                        }
+                    }
+                }
+                catch (IOException ioe) {
+                    System.out.println("Exception while reading input " + ioe);
+                }
+                if (Integer.parseInt(CURRENT_VERSION) < Integer.parseInt(version)) {
+                    showupdate=true;
+                }
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                progressBar.setProgress(0);
+                Enable();
+                startCancelButton.disableProperty().setValue(true);
+                if (showupdate) {
+                    if (createAlert("Download","Update","A new update is available for Iso2Usb",
+                            Alert.AlertType.INFORMATION,ButtonType.YES,ButtonType.NO)) {
+                        try {
+                            new ProcessBuilder("x-www-browser", "https://kaustubhpatange.github.io/Iso2Usb").start();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }else logTextArea.appendText("[*] No update found!\n");
+
+                // Running usbTask
+                runUsbTask(false);
+
+                super.succeeded();
+            }
+        }).start();
+    }
+
+    // This method will be used to check if internet connection is available
+    private boolean checkForConnection() {
+        try {
+            URL url = new URL("http://www.google.com");
+            URLConnection conn = url.openConnection();
+            conn.connect();
+            conn.getInputStream().close();
+            return true;
+        }catch (Exception ignore) {
+            return false;
+        }
+    }
+
     // A piece of code from stackoverflow extracting file from resource to a folder
      public void ExportResource(String resourceName,String destination,boolean to_tmp) {
          try {

@@ -22,8 +22,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("iso2Usb.fxml"));
         Parent root = fxmlLoader.load();
-        primaryStage.setTitle("Iso2Usb - 1.0.5.0 (Portable)");
-        ((Controller) fxmlLoader.getController()).setStage(primaryStage);
+        primaryStage.setTitle("Iso2Usb - 0.1.5.0 (Portable)");
+        Controller controller = fxmlLoader.getController();
+        (controller).setStage(primaryStage,fxmlLoader);
+        primaryStage.setOnCloseRequest(e->controller.onClose());
         primaryStage.getIcons().add(new Image(("file:icon.png")));
         Scene scene = new Scene(root, 617, 531);
         primaryStage.setScene(scene);

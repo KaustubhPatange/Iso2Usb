@@ -29,11 +29,28 @@ body {
     padding: 5px;
     font-weight: bold;
 }
+.topmenu {
+    border: 1px solid #3D3D3D;
+    border-radius: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
 .changelogview {
     width: auto;
     padding-right: 50px;
     padding-left: 50px;
     padding-bottom: 5px;
+    margin-top: 13px;
+    border-radius: 4px;
+    background: #F5F5F5;
+    border: 1px solid #CCCCCC;
+}
+.codeview {
+    width: auto;
+    padding-right: 50px;
+    padding-left: 50px;
     margin-top: 13px;
     border-radius: 4px;
     background: #F5F5F5;
