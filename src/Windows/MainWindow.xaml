@@ -28,7 +28,7 @@
                         <Image Source="Resources/checksum.png"/>
                     </Button>
                     <!-- Visit Web -->
-                    <Button Margin="3,0,0,0" ToolTip="Visit Web" Name="_visitWeb" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0">
+                    <Button Margin="3,0,0,0" ToolTip="Visit Web" Name="_visitWeb" Height="20" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" BorderThickness="0" Click="_visitWeb_Click">
                         <Image Source="Resources/web.png"/>
                     </Button>
                     <!-- Information -->

@@ -497,7 +497,16 @@ namespace UsbExtractor
             }
             else MessageBox.Show("No active internet connection", "Notice", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
- 
+        /// <summary>
+        /// This event will occur when visit web buttons is clicked from status bar...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _visitWeb_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://kaustubhpatange.github.io/Iso2Usb");
+        }
+
         /// <summary>
         /// This is out main function to check for updates...
         /// </summary>
@@ -549,6 +558,7 @@ namespace UsbExtractor
                     downloadclient.DownloadFileAsync(new Uri(downloadlink), $"Iso2Usb_{version}.exe");
                 }
             }
+            else _logTextBox.AppendText("[*] No updates found!"+Environment.NewLine);
         }
         /// <summary>
         /// This event will occur when file is downloading...
@@ -632,11 +642,11 @@ namespace UsbExtractor
                 _targetCombo.SelectedIndex = 0;
             }
             // Enabling start button...
-            if (_usbdriveCombo.Items.Count < 0)
+            if (_usbdriveCombo.Items.Count > 0 && _fileCombo.Items.Count > 0)
             {
-                _startcancelButton.IsEnabled = false;
+                _startcancelButton.IsEnabled = true;
             }
-            else _startcancelButton.IsEnabled = true;
+            else _startcancelButton.IsEnabled = false;
             filename = fileName;
             _progressBar.Value = 0; TaskbarItemInfo.ProgressValue = 0;
             _formatpanel.IsEnabled = true;
@@ -1162,6 +1172,7 @@ namespace UsbExtractor
             //int iNextSpace = input.LastIndexOf(" ", length);
             //return string.Format("{0}...", input.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
         }
+
         public void Wait(double seconds)
         {
             var frame = new DispatcherFrame();

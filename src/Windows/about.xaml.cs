@@ -18,7 +18,7 @@ namespace UsbExtractor
             };
             _website.Click += (o, e) =>
             {
-                Process.Start("");
+                Process.Start("https://kaustubhpatange.github.io/Iso2Usb");
             };
         }
     }
