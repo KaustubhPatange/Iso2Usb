@@ -18,7 +18,7 @@
 
 ## Compilation
 ### Windows
-Use either [Visual Studio 2017](https://visualstudio.microsoft.com/) or later to open file from src/Windows/*.sln file
+* Use either [Visual Studio 2017](https://visualstudio.microsoft.com/) or later to open file from src/Windows/*.sln file
 ### Linux
 * Setup [Java JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) which includes JavaFx source and [Intellij IDEA](https://snapcraft.io/intellij-idea-community)
 * In Intellij, select File > Open project and select folder from src/Linux
