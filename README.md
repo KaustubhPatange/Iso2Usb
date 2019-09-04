@@ -4,7 +4,9 @@
 [![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 ![GitHub repo size](https://img.shields.io/github/repo-size/kaustubhpatange/iso2usb.svg)
 
-![Logo](https://github.com/KaustubhPatange/Iso2Usb/raw/master/images/icon.png)
+[![Logo](https://github.com/KaustubhPatange/Iso2Usb/raw/master/images/icon.png)](https://kaustubhpatange.github.io/Iso2Usb)
+
+_Click on logo to download latest release_
 
 ## Features
 * Create UFEI bootable devices from ISO images
