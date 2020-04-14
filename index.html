@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <!-- Don't need a mobile friendly website -->
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-    <meta name="KEYWORDS" content="iso2usb,unetbootin,rufus,liveusb,ubuntu,mint,fedora,pclinuxos,pclos,sabayon,usb,live usb,debian,gentoo,sabayonlinux,sabayon linux,zenwalk,linux mint,centos,mepis,puppy linux,dsl,elive,mandriva,opensuse,slax,slackware,freebsd,netbsd,bsd,backtrack,ophcrack,supergrubdisk,archlinux,vectorlinux,wubi,netboot,ubuntu-netboot,linux,partedmagic,sbm,smartbootmanager,universal netboot installer,faunos,freedos,download,mac,osx,frugalware,installer,utilities,partition,loopmounted">
+    <meta name="KEYWORDS"
+        content="iso2usb,unetbootin,rufus,liveusb,ubuntu,mint,fedora,pclinuxos,pclos,sabayon,usb,live usb,debian,gentoo,sabayonlinux,sabayon linux,zenwalk,linux mint,centos,mepis,puppy linux,dsl,elive,mandriva,opensuse,slax,slackware,freebsd,netbsd,bsd,backtrack,ophcrack,supergrubdisk,archlinux,vectorlinux,wubi,netboot,ubuntu-netboot,linux,partedmagic,sbm,smartbootmanager,universal netboot installer,faunos,freedos,download,mac,osx,frugalware,installer,utilities,partition,loopmounted">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Iso2Usb - An open source bootable media creator</title>
     <link rel="shortcut icon" href="images/icon.png">
@@ -21,111 +22,163 @@
 
     <div style="margin-top: 10px;text-align: center; clear: both;display: inline-block;">
         <!-- Download windows button -->
-        <a class="buttonclass" href="https://github.com/KaustubhPatange/Iso2Usb/releases/download/0.1.5.0/Iso2Usb_0.1.5.0.zip">
+        <a class="buttonclass"
+            href="https://github.com/KaustubhPatange/Iso2Usb/releases/download/0.1.5.0/Iso2Usb_0.1.5.0.zip">
             <div><img src="images/windows.svg" alt="windows" class="imageclass"><br><b>Download</b>
                 <br><span style="font-size: 14px;color: #fff">(Windows)</span></div>
             <a>
                 <!-- Download linux button-->
                 <a class="buttonclass" href="#instructions">
-                    <div><img style="margin-left: 10px;" src="images/linux.svg" alt="windows" class="imageclass"><br><b>Download</b>
+                    <div><img style="margin-left: 10px;" src="images/linux.svg" alt="windows"
+                            class="imageclass"><br><b>Download</b>
                         <br><span style="font-size: 14px;color: #fff">(Linux)</span></div>
                     <a>
     </div><br>
     <div style="margin-top: 20px;text-align: center; clear: both;display: inline-block;">
-        <a  class="headerbuttons" href="#features">Features</a>
-        <a  class="headerbuttons" href="#howto">How-To</a>
-        <a  class="headerbuttons" href="#instructions">Instructions</a>
-        <a  class="headerbuttons" href="#faq">FAQs</a>
-        <a  class="headerbuttons" href="#contribute">Contribute</a>
+        <a class="headerbuttons" href="#features">Features</a>
+        <a class="headerbuttons" href="#howto">How-To</a>
+        <a class="headerbuttons" href="#instructions">Instructions</a>
+        <a class="headerbuttons" href="#faq">FAQs</a>
+        <a class="headerbuttons" href="#contribute">Contribute</a>
     </div><br><br>
     <div style="display:block; text-align: center; clear: both;">
-        <a href="https://paypal.me/RadhaPatange" target="_blank"><div class="donatebutton"><img src="images/paypal.svg" style="float: left; padding-right: 5px; height: 22px;" alt="Donate via Paypal"><span style="color: #3D3D3D;font-size: 1.1em">Donate via Paypal</span></div></a> 
+        <a href="https://paypal.me/RadhaPatange" target="_blank">
+            <div class="donatebutton"><img src="images/paypal.svg"
+                    style="float: left; padding-right: 5px; height: 22px;" alt="Donate via Paypal"><span
+                    style="color: #3D3D3D;font-size: 1.1em">Donate via Paypal</span></div>
+        </a>
     </div>
     <div style="display: inline-block">
-        <div class="changelogview"><pre style="font-size: 13px;">
+        <div class="changelogview">
+            <pre style="font-size: 13px;">
 <b>version: 1.0.5.0</b>
 last updated: 12th June 2019
 copyright © 2019 Kaustubh Patange
             
 *Initial commit (First release)
-</pre></div></div>
-<div style="padding-right: 40px; padding-left:40px;margin-top: 15px;">
-<p><b>Iso2Usb</b> is an open source utility which allows you to create bootable USB devices for Windows, Ubuntu and other linux distributions from ISO (and other available formats) images.</p>
-<p style="margin-top: -5px">The project is highly inspired by <a target="_blank" href="https://rufus.ie/">Rufus</a> which is written in C++. The <i>windows version</i> is written in C# and <i>Linux</i> with JavaFx. My main reason to create this project is to learn these languages and to practically understand how they work, such type of project inspired me a lot.</p>
-</div>
-<div style="display: inline-block; text-align: center; margin-top: 10px;">
-    <img style="margin-right: 15px;margin-bottom: 10px;border: 1px solid rgb(134, 133, 133);border-radius: 6px;" width="500px;" src="images/appimage1.png" alt="Screenshot1">
-    <img style="margin-left: 15px;margin-bottom: 10px;" width="440px;" src="images/appimage2.png" alt="Screenshot2">
-</div><br>
-<a name="features"></a>
-<div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;" >
-    <div class="topmenu"><span style="font-size: 20px;">Features</span></div>
-</div>
-<div style="padding-right: 40px; padding-left:40px;">
-    <p>Creates bootable USB devices from ISO image.</p>
-    <p style="margin-top: -5px;">Create virtual hard disk (vhd) from USB (windows only).</p>
-    <p style="margin-top: -5px;">Create dd out from USB block (linux only).</p>
-    <p style="margin-top: -5px;">Format drives with FAT32, NTFS, EXT4 (for linux only).</p>
-    <p style="margin-top: -5px;">Automatic detection & selection of cluster size.</p>
-    
-    <p style="font-size: 13px;"><i>In linux it is recommended to format USB with MBR partition for linux OS (also modern Windows ISO boots on MBR part too).<br> That's why <b>Partition Type</b> & <b>Target System</b> box is disabled in linux version.</i></p>
-</div>
-<a name="howto"></a>
-<div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;" >
-    <div class="topmenu"><span style="font-size: 20px;">How-To</span></div>
-</div>
-<div style="padding-right: 40px; padding-left:40px;">
-    <p>Select a USB or Hard drive from the list (which you've inserted). Now select an ISO image from <i>browse</i> button <img  height="20px" src="images/disk.png"> and then click on <i>START</i> button to start the process.</p>
-    <p style="margin-top: -5px;">You can change the format configuration before starting the process, but it is recommend to keep them default.</p>
-    <img width="440px;" src="images/image1.png">
-    <p >You can also calculate md5 and sha1 keys by pressing <i>calculate</i> button <img width="20px" src="images/checksum.png"> from status bar.</p>
-    <img style="border: 1px solid rgb(134, 133, 133);border-radius: 6px;" width="500px;" src="images/image2.png">
-    <p style="font-size: 13px;">Note: Old windows ISO require drive to be in GPT part, so in linux version you've to do it manually. It is recommend to keep cluster size 4096 (standard one) on linux version or file-system may not be usable.</p>
+</pre>
+        </div>
+    </div>
+    <div style="padding-right: 40px; padding-left:40px;margin-top: 15px;">
+        <p><b>Iso2Usb</b> is an open source utility which allows you to create bootable USB devices for Windows, Ubuntu
+            and other linux distributions from ISO (and other available formats) images.</p>
+        <p style="margin-top: -5px">The project is highly inspired by <a target="_blank"
+                href="https://rufus.ie/">Rufus</a> which is written in C++. The <i>windows version</i> is written in C#
+            and <i>Linux</i> with JavaFx. My main reason to create this project is to learn these languages and to
+            practically understand how they work, such type of project inspired me a lot.</p>
+    </div>
+    <div style="display: inline-block; text-align: center; margin-top: 10px;">
+        <img style="margin-right: 15px;margin-bottom: 10px;border: 1px solid rgb(134, 133, 133);border-radius: 6px;"
+            width="500px;" src="images/appimage1.png" alt="Screenshot1">
+        <img style="margin-left: 15px;margin-bottom: 10px;" width="440px;" src="images/appimage2.png" alt="Screenshot2">
+    </div><br>
+    <a name="features"></a>
+    <div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;">
+        <div class="topmenu"><span style="font-size: 20px;">Features</span></div>
+    </div>
+    <div style="padding-right: 40px; padding-left:40px;">
+        <p>Creates bootable USB devices from ISO image.</p>
+        <p style="margin-top: -5px;">Create virtual hard disk (vhd) from USB (windows only).</p>
+        <p style="margin-top: -5px;">Create dd out from USB block (linux only).</p>
+        <p style="margin-top: -5px;">Format drives with FAT32, NTFS, EXT4 (for linux only).</p>
+        <p style="margin-top: -5px;">Automatic detection & selection of cluster size.</p>
+
+        <p style="font-size: 13px;"><i>In linux it is recommended to format USB with MBR partition for linux OS (also
+                modern Windows ISO boots on MBR part too).<br> That's why <b>Partition Type</b> & <b>Target System</b>
+                box is disabled in linux version.</i></p>
+    </div>
+    <a name="howto"></a>
+    <div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;">
+        <div class="topmenu"><span style="font-size: 20px;">How-To</span></div>
+    </div>
+    <div style="padding-right: 40px; padding-left:40px;">
+        <p>Select a USB or Hard drive from the list (which you've inserted). Now select an ISO image from <i>browse</i>
+            button <img height="20px" src="images/disk.png"> and then click on <i>START</i> button to start the process.
+        </p>
+        <p style="margin-top: -5px;">You can change the format configuration before starting the process, but it is
+            recommend to keep them default.</p>
+        <img width="440px;" src="images/image1.png">
+        <p>You can also calculate md5 and sha1 keys by pressing <i>calculate</i> button <img width="20px"
+                src="images/checksum.png"> from status bar.</p>
+        <img style="border: 1px solid rgb(134, 133, 133);border-radius: 6px;" width="500px;" src="images/image2.png">
+        <p style="font-size: 13px;">Note: Old windows ISO require drive to be in GPT part, so in linux version you've to
+            do it manually. It is recommend to keep cluster size 4096 (standard one) on linux version or file-system may
+            not be usable.</p>
     </div>
     <a name="instructions"></a>
-    <div style="display: inline-block; text-align: center; margin-top: 15px;margin-bottom: 10px;" >
+    <div style="display: inline-block; text-align: center; margin-top: 15px;margin-bottom: 10px;">
         <div class="topmenu"><span style="font-size: 20px;">Instructions</span></div>
     </div>
     <div style="padding-right: 40px; padding-left:40px;">
         <h4 style="margin-top: 0px;color:rgb(49, 48, 48);">Windows</h4>
-        <p style="margin-top: -10px;font-size: 14px;">Unzip the downloaded zip, run Iso2Usb.exe and you are good to go.</p>
+        <p style="margin-top: -10px;font-size: 14px;">Unzip the downloaded zip, run Iso2Usb.exe and you are good to go.
+        </p>
         <h4 style="margin-top: 0px;color:rgb(49, 48, 48);margin-bottom: 8px;">Linux</h4>
         <span style="margin-top: -20px;font-size: 14px;">Download the package from the release.</span>
-        <div style="margin-bottom: 10px;" class="codeview"><pre style="font-size: 15px;">curl -LO -o iso2usb.deb http://github.com/KaustubhPatange/Iso2Usb/releases/download/0.1.5.0/Iso2Usb-0.1.5.0-amd64.deb</pre></div>
+        <div style="margin-bottom: 10px;" class="codeview">
+            <pre
+                style="font-size: 15px;">curl -LO -o iso2usb.deb http://github.com/KaustubhPatange/Iso2Usb/releases/download/0.1.5.0/Iso2Usb-0.1.5.0-amd64.deb</pre>
+        </div>
+        <span style="margin-top: -10px;font-size: 14px">Install support for ELF 32-bit LSB executable files.</span>
+        <div style="margin-bottom: 10px;" class="codeview">
+            <pre style="font-size: 15px;">sudo apt install lib32z1</pre>
+        </div>
         <span style="margin-top: -10px;font-size: 14px">Install the debain package.</span>
-        <div style="margin-bottom: 10px;" class="codeview"><pre style="font-size: 15px;">sudo dpkg -i iso2usb.deb</pre></div>
-        <span style="font-size: 13px;"><i>Once installed, it can be run from application menu. Delete the .deb package you've downloaed (optional).</i></span>
+        <div style="margin-bottom: 10px;" class="codeview">
+            <pre style="font-size: 15px;">sudo dpkg -i Iso2Usb-0.1.5.0-amd64.deb</pre>
+        </div>
+        <span style="font-size: 13px;"><i>Once installed, it can be run from application menu. Delete the .deb package
+                you've downloaed (optional).</i></span>
     </div>
     <a name="faq"></a>
-    <div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;" >
+    <div style="display: inline-block; text-align: center; margin-top: 20px;margin-bottom: 10px;">
         <div class="topmenu"><span style="font-size: 20px;">FAQs</span></div>
     </div>
     <div style="padding-right: 40px; padding-left:40px;">
         <p style="font-size: 14px;"><b>Will this work on OS X distributions or Hackintosh?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">I don't think so, since it involves bootloader selection which allows you to customize installer in some sense.</p>
+        <p style="margin-top: -8px;font-size: 14px;">I don't think so, since it involves bootloader selection which
+            allows you to customize installer in some sense.</p>
         <p style="font-size: 14px;"><b>USB stick isn't booting distribution?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">Iso2Usb create standard USB installer devices, so there might be some exception distributions which might not work. However if you found any of them, kindly report them to me!</p>
+        <p style="margin-top: -8px;font-size: 14px;">Iso2Usb create standard USB installer devices, so there might be
+            some exception distributions which might not work. However if you found any of them, kindly report them to
+            me!</p>
         <p style="font-size: 14px;"><b>USB stick isn't detected as a volume drive?</b></p>
         <p style="margin-top: -8px;font-size: 14px;">In such case, format USB with fat32/vfat options.</p>
         <p style="font-size: 14px;"><b>CANCEL/ABORT option is taking too long to stop the process?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">If it's taking too long, remove the USB forcefully and reformat it with fat32/vfat again to avoid detecting issues.</p>
-        <p style="font-size: 14px;"><b>I created bootable USB on linux but when checked on Windows it says corrupt USB, why?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">This is the problem I'm still trying to fix, seems like formatting USB using mkfs 4.0.1 is causing this issue. It will be fixed once I'll figure out why is this happening.</p>
+        <p style="margin-top: -8px;font-size: 14px;">If it's taking too long, remove the USB forcefully and reformat it
+            with fat32/vfat again to avoid detecting issues.</p>
+        <p style="font-size: 14px;"><b>I created bootable USB on linux but when checked on Windows it says corrupt USB,
+                why?</b></p>
+        <p style="margin-top: -8px;font-size: 14px;">This is the problem I'm still trying to fix, seems like formatting
+            USB using mkfs 4.0.1 is causing this issue. It will be fixed once I'll figure out why is this happening.</p>
         <p style="font-size: 14px;"><b>Why linux version application size is so big?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">I've written linux version in JavaFx with jdk8 as default environment but later I found out that latest jdk 11+ does not provide javafx src within package which makes Javafx (Iso2Usb) application unable to run with jdk11+ environment. I could've written it in C++ but, by the time when I realized, it was late and application was almost ready. In future I might write it in C++ if so.</p>
+        <p style="margin-top: -8px;font-size: 14px;">I've written linux version in JavaFx with jdk8 as default
+            environment but later I found out that latest jdk 11+ does not provide javafx src within package which makes
+            Javafx (Iso2Usb) application unable to run with jdk11+ environment. I could've written it in C++ but, by the
+            time when I realized, it was late and application was almost ready. In future I might write it in C++ if so.
+        </p>
         <p style="font-size: 14px;"><b>Where I can report bugs, feature implementation?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">You can quickly create an issue in <a target="_blank" href="https://github.com/KaustubhPatange/Iso2Usb">Iso2Usb</a> github repository. Make sure the issue is not repeated in the section.</p>
+        <p style="margin-top: -8px;font-size: 14px;">You can quickly create an issue in <a target="_blank"
+                href="https://github.com/KaustubhPatange/Iso2Usb">Iso2Usb</a> github repository. Make sure the issue is
+            not repeated in the section.</p>
         <p style="font-size: 14px;"><b>Does Iso2Usb is filled with virus, trojans or other malware?</b></p>
-        <p style="margin-top: -8px;font-size: 14px;">Absolutely not, official Iso2Usb release does not contained malicious work and I do not promote such work. If you're still curious you can check the source code on github.</p>
+        <p style="margin-top: -8px;font-size: 14px;">Absolutely not, official Iso2Usb release does not contained
+            malicious work and I do not promote such work. If you're still curious you can check the source code on
+            github.</p>
     </div>
     <a name="contribute"></a>
-    <div style="display: inline-block; text-align: center; margin-top: 10px;margin-bottom: 5px;" >
+    <div style="display: inline-block; text-align: center; margin-top: 10px;margin-bottom: 5px;">
         <div class="topmenu"><span style="font-size: 20px;">Contribute</span></div>
     </div>
     <div style="padding-right: 40px; padding-left:40px;">
-        <p>Iso2Usb was created by <a target="_blank" href="https://kaustubhpatange.github.io">Kaustubh Patange</a> (Github: <a target="_blank" href="https://github.com/kaustubhpatange">kaustubhpatange</a>)</p>
-        <p>It is licensed under <a target="_blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU General Public License (GPL) Version 3</a>. Application icons, logos are all used under <a target="_blank" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons</a> license.</p>
-        <a target="_blank" href="https://github.com/KaustubhPatange/Iso2Usb"><img height="50px" src="images/github.svg"></a>
+        <p>Iso2Usb was created by <a target="_blank" href="https://kaustubhpatange.github.io">Kaustubh Patange</a>
+            (Github: <a target="_blank" href="https://github.com/kaustubhpatange">kaustubhpatange</a>)</p>
+        <p>It is licensed under <a target="_blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU General
+                Public License (GPL) Version 3</a>. Application icons, logos are all used under <a target="_blank"
+                href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons</a> license.</p>
+        <a target="_blank" href="https://github.com/KaustubhPatange/Iso2Usb"><img height="50px"
+                src="images/github.svg"></a>
     </div>
 </body>
+
 </html>
